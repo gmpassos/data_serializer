@@ -110,6 +110,9 @@ extension BigIntExtension on BigInt {
     _platform.checkSafeIntegerByBigInt(this);
   }
 
+  /// Converts this [BigInt] to a HEX string.
+  ///
+  /// - [width] of the HEX string. Will left-pad with zeroes if needed.
   String toHex({int width = 0}) {
     var hex = toRadixString(16).toUpperCase();
     if (width > 0) {
@@ -123,6 +126,8 @@ extension BigIntExtension on BigInt {
     return hex;
   }
 
+  /// Same as [toHex], but will ensure that the HEX string is unsigned,
+  /// converting the HEX bits to a signed integer, like a [Uint32].
   String toHexUnsigned({int width = 0}) {
     if (isNegative) {
       var hex = toHex();
@@ -151,6 +156,7 @@ extension BigIntExtension on BigInt {
     }
   }
 
+  /// Same as [toHexUnsigned], but ensure a width of 4 bytes (8 HEX width).
   String toHex32() {
     if (isNegative) {
       return toHexUnsigned(width: 8);
@@ -159,6 +165,7 @@ extension BigIntExtension on BigInt {
     }
   }
 
+  /// Same as [toHexUnsigned], but ensure a width of 8 bytes (16 HEX width).
   String toHex64() {
     if (isNegative) {
       return toHexUnsigned(width: 16);
@@ -167,9 +174,55 @@ extension BigIntExtension on BigInt {
     }
   }
 
+  /// Converts this [BigInt] to a [Uint8List] of 4 bytes (32 bits).
   Uint8List toUint8List32() => toInt().toUint8List32();
 
+  /// Converts this [BigInt] to a [Uint8List] of 8 bytes (64 bits).
   Uint8List toUint8List64() => toInt().toUint8List64();
+
+  /// Serializes this [BigInt] to bytes ([Uint8List]). The serialized
+  /// data is prefixed with the size of the bytes that contains the big-integer.
+  ///
+  /// - If [bitLength] is `< 32` it will encode as a [Int32].
+  /// - If [bitLength] is `> 32` it will encode using a `LATIN-1` encoded [String].
+  Uint8List toBytes() {
+    if (bitLength > 32) {
+      var latin1 = toString().encodeLatin1Bytes();
+
+      var bs = Uint8List(4 + latin1.length);
+      var byteData = bs.asByteData();
+
+      byteData.setInt32(0, -latin1.length);
+      bs.setAll(4, latin1);
+
+      return bs;
+    } else {
+      var bs = Uint8List(1 + 4);
+      bs[0] = 0;
+      bs.asByteData().setInt32(1, toInt());
+      return bs;
+    }
+  }
+
+  /// Writes this [BigInt] to [out]. See [toBytes] for encoding description.
+  int writeTo(BytesBuffer out) {
+    if (bitLength > 32) {
+      var bs = toString().encodeLatin1Bytes();
+      assert(bs.isNotEmpty);
+
+      out.writeInt32(-bs.length);
+      out.writeBytes(bs);
+
+      return 4 + bs.length;
+    } else {
+      var bs = toInt().int32ToBytes();
+      assert(bs.length == 4);
+
+      out.writeByte(0);
+      out.writeAllBytes(bs);
+      return 1 + 4;
+    }
+  }
 }
 
 /// Numeric extension for [String].
@@ -545,25 +598,30 @@ extension ListIntExtension on List<int> {
   }
 }
 
+/// Data extension for [Uint8List].
 extension Uint8ListDataExtension on Uint8List {
+  /// Reads bytes ([Uint8List]) of [length] at [offset].
   Uint8List readBytes([int offset = 0, int? length]) {
     length ??= this.length - offset;
     var bs = sublist(offset, offset + length);
     return bs;
   }
 
+  /// Reads a bytes block, using a [Uint32] prefix (4 bytes of length prefix).
   Uint8List readBlock32([int offset = 0]) {
     var sz = getUint32(offset);
     var bs = readBytes(offset + 4, sz);
     return bs;
   }
 
+  /// Reads a bytes block, using a [Uint16] prefix (2 bytes of length prefix).
   Uint8List readBlock16([int offset = 0]) {
     var sz = getUint16(offset);
     var bs = readBytes(offset + 2, sz);
     return bs;
   }
 
+  /// Reads a [BigInt] at [offset]. See [BigIntExtension.toBytes] for encoding description.
   MapEntry<int, BigInt> readBigInt([int offset = 0]) {
     var byteData = asByteData();
     if (this[offset] == 0) {
@@ -579,11 +637,13 @@ extension Uint8ListDataExtension on Uint8List {
     }
   }
 
+  /// Reads a [DateTime] at [offset]. It's encoded as a [Uint64] of [DateTime.millisecondsSinceEpoch].
   DateTime readDateTime([int offset = 0]) {
     var t = getInt64(offset);
     return DateTime.fromMillisecondsSinceEpoch(t, isUtc: true);
   }
 
+  /// Instantiates a [BytesBuffer] from this [Uint8List] instance.
   BytesBuffer toBytesBuffer(
           {int offset = 0,
           int? length,
@@ -595,12 +655,16 @@ extension Uint8ListDataExtension on Uint8List {
           bufferLength: bufferLength,
           copyBuffer: copyBuffer);
 
+  /// Merges `this` instance with [other] using the `AND` logical operator.
   Uint8List operator &(Uint8List other) => merge(other, (a, b, i) => a & b);
 
+  /// Merges `this` instance with [other] using the `OR` logical operator.
   Uint8List operator |(Uint8List other) => merge(other, (a, b, i) => a | b);
 
+  /// Merges `this` instance with [other] using the `XOR` logical operator.
   Uint8List operator ^(Uint8List other) => merge(other, (a, b, i) => a ^ b);
 
+  /// Merges `this` instance with [other] using the [merger] [Function] for each byte.
   Uint8List merge(
       Uint8List other, int Function(int a, int b, int index) merger) {
     var length = min(this.length, other.length);
@@ -614,6 +678,7 @@ extension Uint8ListDataExtension on Uint8List {
     return out;
   }
 
+  /// Groups `this` instance with [other].
   Uint8List group(Uint8List other) {
     var group = Uint8List(length + other.length);
     group.setAll(0, this);
@@ -621,6 +686,7 @@ extension Uint8ListDataExtension on Uint8List {
     return group;
   }
 
+  /// The tail of this [Uint8List] instance.
   Uint8List tail(int length) {
     var myLength = this.length;
     if (myLength == length) {
@@ -631,61 +697,9 @@ extension Uint8ListDataExtension on Uint8List {
 
     return sublist(myLength - length, myLength);
   }
-
-  Uint8List xorTail(Uint8List other) {
-    if (length == other.length) {
-      return this ^ other;
-    }
-
-    var lng = min(length, other.length);
-
-    var n1 = tail(lng);
-    var n2 = other.tail(lng);
-
-    return n1 ^ n2;
-  }
 }
 
-extension BigIntDataExtension on BigInt {
-  Uint8List toBytes() {
-    if (bitLength > 32) {
-      var latin1 = toString().encodeLatin1Bytes();
-
-      var bs = Uint8List(4 + latin1.length);
-      var byteData = bs.asByteData();
-
-      byteData.setInt32(0, -latin1.length);
-      bs.setAll(4, latin1);
-
-      return bs;
-    } else {
-      var bs = Uint8List(1 + 4);
-      bs[0] = 0;
-      bs.asByteData().setInt32(1, toInt());
-      return bs;
-    }
-  }
-
-  int writeTo(BytesBuffer out) {
-    if (bitLength > 32) {
-      var bs = toString().encodeLatin1Bytes();
-      assert(bs.isNotEmpty);
-
-      out.writeInt32(-bs.length);
-      out.writeBytes(bs);
-
-      return 4 + bs.length;
-    } else {
-      var bs = toInt().int32ToBytes();
-      assert(bs.length == 4);
-
-      out.writeByte(0);
-      out.writeAllBytes(bs);
-      return 1 + 4;
-    }
-  }
-}
-
+/// Data extension for a [List] of [Writable].
 extension ListWritableExtension on List<Writable> {
   int get serializeBufferLength => 4 + (length * 128);
 
@@ -705,6 +719,7 @@ List<W> deserializeWritables<W extends Writable>(
   return input.readWritables(reader);
 }
 
+/// Data extension for [DateTime].
 extension DateTimeDataExtension on DateTime {
   int writeTo(BytesBuffer out) {
     var t = toUtc().millisecondsSinceEpoch;

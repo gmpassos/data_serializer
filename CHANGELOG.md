@@ -2,6 +2,7 @@
 
 - Fix `BigInt` serialization.
 - Improve tests.
+- Improve documentation.
 
 ## 1.0.0
 

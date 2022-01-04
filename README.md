@@ -22,8 +22,6 @@ See the [API Documentation][api_doc] for a full list of functions, classes and e
 
 ## Usage
 
-### Numeric extension:
-
 ```dart
 import 'package:data_serializer/data_serializer.dart';
 
@@ -93,6 +91,19 @@ dataBlock2: [110, 120, 130, 140, 150, 160]
 position: 32
 tailBytes: [210, 220]
 ```
+
+## Browser/JavaScript compatibility
+
+All the operations are tested to be compatible with `JavaScript`.
+
+Note that [JS only supports 53-bits integers][js_int_53bits]. To avoid any issue serializing 64-bits integers,
+try to use `BigInt` serialization, or ensure that you are bellow the 53-bits range.
+
+See the class [DataSerializerPlatform][data_serializer_platform] if you need runtime information
+about integers support.
+
+[data_serializer_platform]: https://pub.dev/documentation/data_serializer/latest/data_serializer/DataSerializerPlatform-class.html
+[js_int_53bits]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
 
 ## Test Coverage
 
