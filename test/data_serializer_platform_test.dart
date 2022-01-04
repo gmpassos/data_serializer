@@ -75,7 +75,7 @@ void _testNumber(int n, String result) {
 }
 
 void main() {
-  group('StatisticsPlatform', () {
+  group('DataSerializerPlatform', () {
     setUp(() {});
 
     test('53 bits Limits', () {

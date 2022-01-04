@@ -73,7 +73,7 @@ void main() {
       expect((-123).toHex64(), equals('FFFFFFFFFFFFFF85'));
     });
 
-    test('toHex64', () {
+    test('toStringPadded', () {
       expect(123.toStringPadded(4), equals('0123'));
       expect(123.toStringPadded(1), equals('123'));
       expect(123.toStringPadded(6), equals('000123'));

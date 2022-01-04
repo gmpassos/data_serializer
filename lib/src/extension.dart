@@ -13,10 +13,10 @@ final DataSerializerPlatform _platform = DataSerializerPlatform.instance;
 
 /// Data extension for `int`.
 extension IntDataExtension on int {
-  /// Returns `true` if this `int` is safe for the current platform ([StatisticsPlatform]).
+  /// Returns `true` if this `int` is safe for the current platform ([DataSerializerPlatform]).
   bool get isSafeInteger => _platform.isSafeInteger(this);
 
-  /// Checks if this `int` is safe for the current platform ([StatisticsPlatform]).
+  /// Checks if this `int` is safe for the current platform ([DataSerializerPlatform]).
   void checkSafeInteger() {
     _platform.checkSafeInteger(this);
   }
@@ -102,10 +102,10 @@ extension IntDataExtension on int {
 
 /// Data extension for [BigInt].
 extension BigIntDataExtension on BigInt {
-  /// Returns `true` if this as `int` is safe for the current platform ([StatisticsPlatform]).
+  /// Returns `true` if this as `int` is safe for the current platform ([DataSerializerPlatform]).
   bool get isSafeInteger => _platform.isSafeIntegerByBigInt(this);
 
-  /// Checks if this as `int` is safe for the current platform ([StatisticsPlatform]).
+  /// Checks if this as `int` is safe for the current platform ([DataSerializerPlatform]).
   void checkSafeInteger() {
     _platform.checkSafeIntegerByBigInt(this);
   }

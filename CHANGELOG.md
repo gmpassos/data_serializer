@@ -1,3 +1,7 @@
+## 1.0.3
+
+- Fix some documentation references.
+
 ## 1.0.2
 
 - Organize extensions names.
