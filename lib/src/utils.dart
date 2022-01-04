@@ -5,15 +5,6 @@ import 'package:base_codecs/base_codecs.dart';
 
 import 'bytes_buffer.dart';
 
-BigInt? parseBigInt(dynamic n, [BigInt? def]) {
-  if (n == null) return def;
-  if (n is BigInt) return n;
-  if (n is int) return BigInt.from(n);
-
-  var s = n.toString().trim();
-  return BigInt.tryParse(s) ?? def;
-}
-
 /// An instance of the default implementation of the [HexCodec].
 const hex = HexCodec();
 

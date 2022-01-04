@@ -3,8 +3,8 @@ import "dart:math" as math;
 import 'dart:typed_data';
 
 import 'extension.dart';
-import 'utils.dart';
 import 'platform.dart';
+import 'utils.dart';
 
 final DataSerializerPlatform _platform = DataSerializerPlatform.instance;
 
