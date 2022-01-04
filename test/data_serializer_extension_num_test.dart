@@ -365,8 +365,8 @@ void main() {
 
       expect(
           Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8, 9])
-            ..setUint64(0xFFFEFDFCFBFAF9F8, 1),
-          equals([1, 255, 254, 253, 252, 251, 250, 249, 248]));
+            ..setUint64(0x1FFDFCFBFAF9F8, 1),
+          equals([1, 0, 31, 253, 252, 251, 250, 249, 248]));
 
       //
 
@@ -381,8 +381,8 @@ void main() {
 
       expect(
           Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8, 9])
-            ..setInt64(0xFFFEFDFCFBFAF9F8, 1),
-          equals([1, 255, 254, 253, 252, 251, 250, 249, 248]));
+            ..setInt64(0x1FFDFCFBFAF9F8, 1),
+          equals([1, 0, 31, 253, 252, 251, 250, 249, 248]));
 
       //
 

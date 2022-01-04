@@ -10,11 +10,23 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
 
   static final int _minSafeInt = -9007199254740991;
 
+  static final Uint8List _maxSafeIntBytes =
+      '001FFFFFFFFFFFFF'.decodeHex().asUnmodifiableView;
+
+  static final Uint8List _minSafeIntBytes =
+      'FFE0000000000001'.decodeHex().asUnmodifiableView;
+
   @override
   int get maxSafeInt => _maxSafeInt;
 
   @override
   int get minSafeInt => _minSafeInt;
+
+  @override
+  Uint8List get maxSafeIntBytes => _maxSafeIntBytes;
+
+  @override
+  Uint8List get minSafeIntBytes => _minSafeIntBytes;
 
   @override
   int get safeIntBits => 53;
@@ -50,7 +62,7 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
     }
   }
 
-  void _writeUint64Impl(ByteData data, int n, [int offset = 0]) {
+  void _writeUint64Impl(ByteData data, int n, int offset) {
     checkSafeInteger(n);
 
     // Right shift operator (>>) will cast to 32 bits in JS:

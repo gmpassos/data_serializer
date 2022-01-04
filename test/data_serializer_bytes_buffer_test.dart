@@ -1,3 +1,4 @@
+@Tags(['bytes'])
 import 'dart:typed_data';
 
 import 'package:data_serializer/data_serializer.dart';
@@ -41,14 +42,14 @@ void main() {
       expect(buffer.toUint8List(1), equals([4, 3, 2, 1]));
       expect(buffer.toUint8List(1, 2), equals([4, 3]));
 
-      expect(buffer.writeInt64(0x0908070605040302), equals(8));
+      expect(buffer.writeInt64(0x08070605040302), equals(8));
       expect(buffer.toUint8List(),
-          equals([123, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 3, 2]));
+          equals([123, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2]));
       expect(buffer.length, equals(1 + 4 + 8));
       expect(buffer.position, equals(1 + 4 + 8));
       expect(buffer.capacity, equals(16));
 
-      expect(buffer.writeInt64(0x0102030405060708), equals(8));
+      expect(buffer.writeInt64(0x02030405060708), equals(8));
       expect(
           buffer.toUint8List(),
           equals([
@@ -57,7 +58,7 @@ void main() {
             3,
             2,
             1,
-            9,
+            0,
             8,
             7,
             6,
@@ -65,7 +66,7 @@ void main() {
             4,
             3,
             2,
-            1,
+            0,
             2,
             3,
             4,
@@ -86,14 +87,14 @@ void main() {
       expect(buffer2.position, equals(0));
       expect(buffer2.capacity, equals(4));
 
-      expect(buffer2.writeInt64(0x0908070605040302), equals(8));
-      expect(buffer2.toUint8List(), equals([9, 8, 7, 6, 5, 4, 3, 2]));
+      expect(buffer2.writeInt64(0x08070605040302), equals(8));
+      expect(buffer2.toUint8List(), equals([0, 8, 7, 6, 5, 4, 3, 2]));
       expect(buffer2.length, equals(8));
       expect(buffer2.position, equals(8));
       expect(buffer2.capacity, equals(8));
 
       buffer2.seek(0);
-      expect(buffer2.readByte(), equals(9));
+      expect(buffer2.readByte(), equals(0));
       expect(buffer2.position, equals(1));
       expect(buffer2.readInt32(), equals(0x08070605));
       expect(buffer2.position, equals(5));
@@ -204,13 +205,16 @@ void main() {
       expect(buffer.readRemainingBytes(), equals([120, 130]));
     });
 
-    test('writeUint64/readUint64/readUint32', () {
+    test('writeUint64/readUint64/readUint32 +', () {
       var buffer = BytesBuffer();
 
       var maxSafeInt = DataSerializerPlatform.instance.maxSafeInt;
       buffer.writeUint64(maxSafeInt);
       expect(buffer.length, equals(8));
       expect(buffer.position, equals(8));
+
+      expect(buffer.toUint8List(),
+          equals(DataSerializerPlatform.instance.maxSafeIntBytes));
 
       buffer.seek(0);
 
@@ -220,17 +224,56 @@ void main() {
 
       buffer.seek(0);
 
-      expect(buffer.readUint32(), equals(maxSafeInt >> 32));
+      expect(buffer.readUint32(), equals(maxSafeInt ~/ 0xFFFFFFFF - 1));
       expect(buffer.readUint32(), equals(maxSafeInt & 0xFFFFFFFF));
 
       buffer.bytesTo((bytes, offset, length) {
+        expect(
+            bytes.sublist(offset, offset + length),
+            equals(
+                ((maxSafeInt ~/ 0xFFFFFFFF - 1) & 0xFFFFFFFF).toUint8List32()));
+      }, 0, 4);
+
+      buffer.bytesTo((bytes, offset, length) {
+        expect(
+            bytes.sublist(offset, offset + length),
+            equals(((maxSafeInt ~/ 0xFFFFFFFF - 1) << 8 & 0xFFFFFFFF | 0xFF)
+                .toUint8List32()));
+      }, 1, 4);
+    });
+
+    test('writeUint64/readUint64/readUint32 -', () {
+      var buffer = BytesBuffer();
+
+      var minSafeInt = DataSerializerPlatform.instance.minSafeInt;
+      var minSafeIntBytes = DataSerializerPlatform.instance.minSafeIntBytes;
+
+      buffer.writeUint64(minSafeInt);
+      expect(buffer.length, equals(8));
+      expect(buffer.position, equals(8));
+
+      expect(buffer.toUint8List(), equals(minSafeIntBytes));
+
+      buffer.seek(0);
+
+      expect(buffer.readUint64(), equals(minSafeInt));
+      expect(buffer.length, equals(8));
+      expect(buffer.position, equals(8));
+
+      buffer.seek(0);
+
+      expect(buffer.readUint32().toUint8List32(),
+          equals(minSafeIntBytes.sublist(0, 4)));
+      expect(buffer.readUint32(), equals(minSafeInt & 0xFFFFFFFF));
+
+      buffer.bytesTo((bytes, offset, length) {
         expect(bytes.sublist(offset, offset + length),
-            equals(((maxSafeInt >> (32)) & 0xFFFFFFFF).toUint8List32()));
+            equals(minSafeIntBytes.sublist(0, 4)));
       }, 0, 4);
 
       buffer.bytesTo((bytes, offset, length) {
         expect(bytes.sublist(offset, offset + length),
-            equals((0xFFFFFFFF).toUint8List32()));
+            equals(minSafeIntBytes.sublist(1, 5)));
       }, 1, 4);
     });
 

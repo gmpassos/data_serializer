@@ -20,6 +20,10 @@ abstract class DataSerializerPlatform {
 
   int get minSafeInt;
 
+  Uint8List get maxSafeIntBytes;
+
+  Uint8List get minSafeIntBytes;
+
   int get safeIntBits;
 
   bool get supportsFullInt64;
