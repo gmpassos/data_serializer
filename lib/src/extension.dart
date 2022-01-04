@@ -11,8 +11,8 @@ import 'utils.dart';
 
 final DataSerializerPlatform _platform = DataSerializerPlatform.instance;
 
-/// extension for `int`.
-extension IntExtension on int {
+/// Data extension for `int`.
+extension IntDataExtension on int {
   /// Returns `true` if this `int` is safe for the current platform ([StatisticsPlatform]).
   bool get isSafeInteger => _platform.isSafeInteger(this);
 
@@ -100,8 +100,8 @@ extension IntExtension on int {
   Uint8List uInt64ToBytes() => Uint8List(8)..setUint64(this);
 }
 
-/// extension for [BigInt].
-extension BigIntExtension on BigInt {
+/// Data extension for [BigInt].
+extension BigIntDataExtension on BigInt {
   /// Returns `true` if this as `int` is safe for the current platform ([StatisticsPlatform]).
   bool get isSafeInteger => _platform.isSafeIntegerByBigInt(this);
 
@@ -225,8 +225,8 @@ extension BigIntExtension on BigInt {
   }
 }
 
-/// Numeric extension for [String].
-extension StringExtension on String {
+/// Data extension for [String].
+extension StringDataExtension on String {
   /// Same as [padLeft] with `0`, but respects the numerical signal.
   String numericalPadLeft(int width) {
     var s = this;
@@ -257,8 +257,77 @@ extension StringExtension on String {
   Uint8List encodeUTF8Bytes() => Uint8List.fromList(encodeUTF8());
 }
 
-/// Extension for [Uint8List].
-extension Uint8ListExtension on Uint8List {
+/// Data Extension for `List<int>`.
+extension ListIntDataExtension on List<int> {
+  /// Same as [encodeUint8List].
+  Uint8List toUint8List() => encodeUint8List();
+
+  /// Ensures that this [List] is a [Uint8List].
+  ///
+  /// Calls [encodeUint8List] if needed, or just cast to [Uint8List].
+  Uint8List get asUint8List =>
+      this is Uint8List ? (this as Uint8List) : encodeUint8List();
+
+  /// Encodes this [List] to a [Uint8List] of `Uint8`.
+  Uint8List encodeUint8List() => Uint8List.fromList(this);
+
+  /// Encodes this [List] to a [Uint8List] of `Uint16`.
+  Uint8List encodeUint16List() {
+    final length = this.length;
+
+    final bs = Uint8List(length * 2);
+    final byteData = bs.asByteData();
+    var byteDataOffset = 0;
+
+    for (var i = 0; i < length; ++i) {
+      var n = this[i];
+      byteData.setUint16(byteDataOffset, n);
+      byteDataOffset += 2;
+    }
+
+    return bs;
+  }
+
+  /// Encodes this [List] to a [Uint8List] of `Uint32`.
+  Uint8List encodeUint32List() {
+    final length = this.length;
+
+    final bs = Uint8List(length * 4);
+    final byteData = bs.asByteData();
+    var byteDataOffset = 0;
+
+    for (var i = 0; i < length; ++i) {
+      var n = this[i];
+      byteData.setUint32(byteDataOffset, n);
+      byteDataOffset += 4;
+    }
+
+    return bs;
+  }
+
+  /// Encodes this [List] to a [Uint8List] of `Uint64`.
+  Uint8List encodeUint64List() {
+    final p = _platform;
+
+    final length = this.length;
+    final bs = Uint8List(length * 8);
+
+    var byteDataOffset = 0;
+
+    for (var i = 0; i < length; ++i) {
+      var n = this[i];
+
+      p.writeUint64(bs, n, byteDataOffset);
+
+      byteDataOffset += 8;
+    }
+
+    return bs;
+  }
+}
+
+/// Data Extension for [Uint8List].
+extension Uint8ListDataExtension on Uint8List {
   /// Returns this bytes as [String] of bits of length [width].
   String bitsPadded(int width) =>
       map((e) => e.bits8).join().numericalPadLeft(width);
@@ -528,78 +597,7 @@ extension Uint8ListExtension on Uint8List {
     return List<int>.generate(
         length ~/ 8, (i) => _platform.readInt64(this, i * 8));
   }
-}
 
-extension ListIntExtension on List<int> {
-  /// Same as [encodeUint8List].
-  Uint8List toUint8List() => encodeUint8List();
-
-  /// Ensures that this [List] is a [Uint8List].
-  ///
-  /// Calls [encodeUint8List] if needed, or just cast to [Uint8List].
-  Uint8List get asUint8List =>
-      this is Uint8List ? (this as Uint8List) : encodeUint8List();
-
-  /// Encodes this [List] to a [Uint8List] of `Uint8`.
-  Uint8List encodeUint8List() => Uint8List.fromList(this);
-
-  /// Encodes this [List] to a [Uint8List] of `Uint16`.
-  Uint8List encodeUint16List() {
-    final length = this.length;
-
-    final bs = Uint8List(length * 2);
-    final byteData = bs.asByteData();
-    var byteDataOffset = 0;
-
-    for (var i = 0; i < length; ++i) {
-      var n = this[i];
-      byteData.setUint16(byteDataOffset, n);
-      byteDataOffset += 2;
-    }
-
-    return bs;
-  }
-
-  /// Encodes this [List] to a [Uint8List] of `Uint32`.
-  Uint8List encodeUint32List() {
-    final length = this.length;
-
-    final bs = Uint8List(length * 4);
-    final byteData = bs.asByteData();
-    var byteDataOffset = 0;
-
-    for (var i = 0; i < length; ++i) {
-      var n = this[i];
-      byteData.setUint32(byteDataOffset, n);
-      byteDataOffset += 4;
-    }
-
-    return bs;
-  }
-
-  /// Encodes this [List] to a [Uint8List] of `Uint64`.
-  Uint8List encodeUint64List() {
-    final p = _platform;
-
-    final length = this.length;
-    final bs = Uint8List(length * 8);
-
-    var byteDataOffset = 0;
-
-    for (var i = 0; i < length; ++i) {
-      var n = this[i];
-
-      p.writeUint64(bs, n, byteDataOffset);
-
-      byteDataOffset += 8;
-    }
-
-    return bs;
-  }
-}
-
-/// Data extension for [Uint8List].
-extension Uint8ListDataExtension on Uint8List {
   /// Reads bytes ([Uint8List]) of [length] at [offset].
   Uint8List readBytes([int offset = 0, int? length]) {
     length ??= this.length - offset;
@@ -641,6 +639,12 @@ extension Uint8ListDataExtension on Uint8List {
   DateTime readDateTime([int offset = 0]) {
     var t = getInt64(offset);
     return DateTime.fromMillisecondsSinceEpoch(t, isUtc: true);
+  }
+
+  /// Reads a list of [Writable] using the [reader] function to instantiate the [W] elements.
+  List<W> readWritables<W extends Writable>(
+      W Function(BytesBuffer input) reader) {
+    return toBytesBuffer().readWritables(reader);
   }
 
   /// Instantiates a [BytesBuffer] from this [Uint8List] instance.
@@ -712,11 +716,6 @@ extension ListWritableExtension on List<Writable> {
     writeTo(buffer);
     return buffer.asUint8List();
   }
-}
-
-List<W> deserializeWritables<W extends Writable>(
-    BytesBuffer input, W Function(BytesBuffer input) reader) {
-  return input.readWritables(reader);
 }
 
 /// Data extension for [DateTime].

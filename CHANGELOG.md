@@ -1,3 +1,9 @@
+## 1.0.2
+
+- Organize extensions names.
+- Clean code.
+- Improve tests.
+
 ## 1.0.1
 
 - Fix `BigInt` serialization.
