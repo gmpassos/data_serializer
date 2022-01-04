@@ -710,7 +710,7 @@ extension ListWritableExtension on List<Writable> {
   Uint8List serialize() {
     var buffer = BytesBuffer(serializeBufferLength);
     writeTo(buffer);
-    return buffer.toUint8List();
+    return buffer.asUint8List();
   }
 }
 

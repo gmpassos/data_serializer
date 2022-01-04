@@ -55,7 +55,7 @@ void main() {
       expect(buffer.capacity, equals(16));
 
       expect(buffer.writeByte(123), equals(1));
-      expect(buffer.toUint8List(), equals([123]));
+      expect(buffer.asUint8List(), equals([123]));
 
       expect(buffer.length, equals(1));
       expect(buffer.isEmpty, isFalse);
@@ -64,23 +64,23 @@ void main() {
       expect(buffer.capacity, equals(16));
 
       expect(buffer.writeInt32(0x01020304), equals(4));
-      expect(buffer.toUint8List(), equals([123, 1, 2, 3, 4]));
+      expect(buffer.asUint8List(), equals([123, 1, 2, 3, 4]));
       expect(buffer.length, equals(1 + 4));
       expect(buffer.position, equals(1 + 4));
       expect(buffer.capacity, equals(16));
 
       buffer.seek(1);
       expect(buffer.writeInt32(0x04030201), equals(4));
-      expect(buffer.toUint8List(), equals([123, 4, 3, 2, 1]));
+      expect(buffer.asUint8List(), equals([123, 4, 3, 2, 1]));
       expect(buffer.length, equals(1 + 4));
       expect(buffer.position, equals(1 + 4));
       expect(buffer.capacity, equals(16));
 
-      expect(buffer.toUint8List(1), equals([4, 3, 2, 1]));
-      expect(buffer.toUint8List(1, 2), equals([4, 3]));
+      expect(buffer.asUint8List(1), equals([4, 3, 2, 1]));
+      expect(buffer.asUint8List(1, 2), equals([4, 3]));
 
       expect(buffer.writeUint64(0x08070605040302), equals(8));
-      expect(buffer.toUint8List(),
+      expect(buffer.asUint8List(),
           equals([123, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2]));
       expect(buffer.length, equals(1 + 4 + 8));
       expect(buffer.position, equals(1 + 4 + 8));
@@ -88,7 +88,7 @@ void main() {
 
       expect(buffer.writeUint64(0x02030405060708), equals(8));
       expect(
-          buffer.toUint8List(),
+          buffer.asUint8List(),
           equals([
             123,
             4,
@@ -116,16 +116,16 @@ void main() {
       expect(buffer.position, equals(1 + 4 + 8 + 8));
       expect(buffer.capacity, greaterThan(1 + 4 + 8 + 8));
 
-      var buffer2 = BytesBuffer.from(buffer.toUint8List(),
+      var buffer2 = BytesBuffer.from(buffer.asUint8List(),
           offset: 1, length: 4, copyBuffer: true);
 
-      expect(buffer2.toUint8List(), equals([4, 3, 2, 1]));
+      expect(buffer2.asUint8List(), equals([4, 3, 2, 1]));
       expect(buffer2.length, equals(4));
       expect(buffer2.position, equals(0));
       expect(buffer2.capacity, equals(4));
 
       expect(buffer2.writeInt64(0x08070605040302), equals(8));
-      expect(buffer2.toUint8List(), equals([0, 8, 7, 6, 5, 4, 3, 2]));
+      expect(buffer2.asUint8List(), equals([0, 8, 7, 6, 5, 4, 3, 2]));
       expect(buffer2.length, equals(8));
       expect(buffer2.position, equals(8));
       expect(buffer2.capacity, equals(8));
@@ -262,7 +262,7 @@ void main() {
       expect(buffer.length, equals(8));
       expect(buffer.position, equals(8));
 
-      expect(buffer.toUint8List(),
+      expect(buffer.asUint8List(),
           equals(DataSerializerPlatform.instance.maxSafeIntBytes));
 
       buffer.seek(0);
@@ -301,7 +301,7 @@ void main() {
       expect(buffer.length, equals(8));
       expect(buffer.position, equals(8));
 
-      expect(buffer.toUint8List(), equals(minSafeIntBytes));
+      expect(buffer.asUint8List(), equals(minSafeIntBytes));
 
       buffer.seek(0);
 
@@ -447,6 +447,8 @@ void main() {
         FooWritable(12, 'Baz'),
       ]);
 
+      [FooWritable(11, 'Bar1'), FooWritable(12, 'Baz2')].writeTo(buffer);
+
       buffer.seek(0);
 
       var o = buffer.readWritable((input) => FooWritable.deserialize(input));
@@ -461,6 +463,14 @@ void main() {
       expect(list[0], equals(FooWritable(10, 'Foo')));
       expect(list[1], equals(FooWritable(11, 'Bar')));
       expect(list[2], equals(FooWritable(12, 'Baz')));
+
+      var list2 =
+          buffer.readWritables((input) => FooWritable.deserialize(input));
+
+      expect(list2.length, equals(2));
+
+      expect(list2[0], equals(FooWritable(11, 'Bar1')));
+      expect(list2[1], equals(FooWritable(12, 'Baz2')));
     });
   });
 }

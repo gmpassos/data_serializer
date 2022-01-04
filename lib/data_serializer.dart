@@ -1,6 +1,4 @@
-/// Support for doing something awesome.
-///
-/// More dartdocs go here.
+/// Library to handle data serialization/deserialization efficiently.
 library data_serializer;
 
 export 'src/bytes_buffer.dart';

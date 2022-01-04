@@ -29,7 +29,7 @@ abstract class Writable {
   static Uint8List doSerialize(Writable writable) {
     var buffer = BytesBuffer(writable.serializeBufferLength);
     writable.writeTo(buffer);
-    return buffer.toUint8List();
+    return buffer.asUint8List();
   }
 
   Uint8List serialize() => doSerialize(this);
