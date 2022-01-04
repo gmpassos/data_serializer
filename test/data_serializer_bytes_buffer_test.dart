@@ -6,6 +6,43 @@ import 'package:test/test.dart';
 
 enum FooEnum { a, b, c }
 
+class FooWritable implements Writable {
+  final int id;
+  final String name;
+
+  FooWritable(this.id, this.name);
+
+  factory FooWritable.deserialize(BytesBuffer input) {
+    var id = input.readInt32();
+    var name = input.readString();
+    return FooWritable(id, name);
+  }
+
+  @override
+  Uint8List serialize() => Writable.doSerialize(this);
+
+  @override
+  int get serializeBufferLength => 4 + 4 + name.length;
+
+  @override
+  int writeTo(BytesBuffer out) {
+    var sz = out.writeInt32(id);
+    sz += out.writeString(name);
+    return sz;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FooWritable &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name;
+
+  @override
+  int get hashCode => id.hashCode ^ name.hashCode;
+}
+
 void main() {
   group('BytesBuffer', () {
     test('basic 1', () {
@@ -42,14 +79,14 @@ void main() {
       expect(buffer.toUint8List(1), equals([4, 3, 2, 1]));
       expect(buffer.toUint8List(1, 2), equals([4, 3]));
 
-      expect(buffer.writeInt64(0x08070605040302), equals(8));
+      expect(buffer.writeUint64(0x08070605040302), equals(8));
       expect(buffer.toUint8List(),
           equals([123, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2]));
       expect(buffer.length, equals(1 + 4 + 8));
       expect(buffer.position, equals(1 + 4 + 8));
       expect(buffer.capacity, equals(16));
 
-      expect(buffer.writeInt64(0x02030405060708), equals(8));
+      expect(buffer.writeUint64(0x02030405060708), equals(8));
       expect(
           buffer.toUint8List(),
           equals([
@@ -181,6 +218,18 @@ void main() {
       expect(buffer.position, equals(2));
       expect(buffer.length, equals(2));
 
+      buffer.seek(0);
+
+      buffer.write([10, 20, 30, 40, 50], 3);
+      expect(buffer.length, equals(2));
+      expect(buffer.position, equals(2));
+
+      buffer.seek(0);
+
+      expect(buffer.readBytes(2), equals([40, 50]));
+      expect(buffer.position, equals(2));
+      expect(buffer.length, equals(2));
+
       buffer.writeAllBytes(Uint8List.fromList([110, 120, 130, 140, 150]));
       expect(buffer.position, equals(7));
       expect(buffer.length, equals(7));
@@ -248,7 +297,7 @@ void main() {
       var minSafeInt = DataSerializerPlatform.instance.minSafeInt;
       var minSafeIntBytes = DataSerializerPlatform.instance.minSafeIntBytes;
 
-      buffer.writeUint64(minSafeInt);
+      buffer.writeInt64(minSafeInt);
       expect(buffer.length, equals(8));
       expect(buffer.position, equals(8));
 
@@ -256,7 +305,7 @@ void main() {
 
       buffer.seek(0);
 
-      expect(buffer.readUint64(), equals(minSafeInt));
+      expect(buffer.readInt64(), equals(minSafeInt));
       expect(buffer.length, equals(8));
       expect(buffer.position, equals(8));
 
@@ -309,7 +358,24 @@ void main() {
       expect(buffer.readBlock32(), equals([210, 220, 230, 240]));
     });
 
-    test('writeUint64/readUint64/readUint32', () {
+    test('writeUint16/readUint16', () {
+      var buffer = BytesBuffer();
+
+      buffer.writeInt16(0x0102);
+      buffer.writeUint16(0x0304, Endian.little);
+
+      buffer.seek(0);
+
+      expect(buffer.readInt16(), equals(0x0102));
+      expect(buffer.readUint16(), equals(0x0403));
+
+      buffer.seek(0);
+
+      expect(buffer.readInt16(Endian.little), equals(0x0201));
+      expect(buffer.readUint16(Endian.little), equals(0x0304));
+    });
+
+    test('writeString/readString', () {
       var buffer = BytesBuffer();
 
       buffer.writeString('abcd');
@@ -317,6 +383,84 @@ void main() {
       buffer.seek(0);
 
       expect(buffer.readString(), equals('abcd'));
+    });
+
+    test('writeString/readString', () {
+      var buffer = BytesBuffer();
+
+      buffer.writeBigInt(BigInt.from(1234567));
+      buffer.writeBigInt(
+          BigInt.parse('123456789101112131415161718192021222324252627282930'));
+
+      buffer.seek(0);
+
+      expect(buffer.readBigInt(), equals(BigInt.from(1234567)));
+      expect(
+          buffer.readBigInt(),
+          equals(BigInt.parse(
+              '123456789101112131415161718192021222324252627282930')));
+    });
+
+    test('writeBlocks/compact/reset', () {
+      var buffer = BytesBuffer();
+
+      buffer.writeBlocks([
+        [10, 20].toUint8List(),
+        [30, 40, 50].toUint8List(),
+        [60, 70, 80, 90].toUint8List(),
+      ]);
+
+      final blocksLength = 4 + 4 + 2 + 4 + 3 + 4 + 4;
+      expect(buffer.length, equals(blocksLength));
+
+      buffer.seek(0);
+
+      var blocks = buffer.readBlocks();
+
+      expect(blocks.length, equals(3));
+
+      expect(blocks[0], equals([10, 20]));
+      expect(blocks[1], equals([30, 40, 50]));
+      expect(blocks[2], equals([60, 70, 80, 90]));
+
+      expect(buffer.capacity, equals(32));
+      expect(buffer.length, equals(blocksLength));
+      buffer.compact();
+      expect(buffer.capacity, equals(blocksLength));
+      expect(buffer.length, equals(blocksLength));
+
+      buffer.reset();
+      expect(buffer.length, equals(0));
+      expect(buffer.position, equals(0));
+
+      expect(() => buffer.readBlocks(), throwsA(isA<BytesBufferEOF>()));
+    });
+
+    test('writeBlocks/compact/reset', () {
+      var buffer = BytesBuffer();
+
+      buffer.writeWritable(FooWritable(101, 'FOO'));
+
+      buffer.writeWritables([
+        FooWritable(10, 'Foo'),
+        FooWritable(11, 'Bar'),
+        FooWritable(12, 'Baz'),
+      ]);
+
+      buffer.seek(0);
+
+      var o = buffer.readWritable((input) => FooWritable.deserialize(input));
+
+      expect(o, equals(FooWritable(101, 'FOO')));
+
+      var list =
+          buffer.readWritables((input) => FooWritable.deserialize(input));
+
+      expect(list.length, equals(3));
+
+      expect(list[0], equals(FooWritable(10, 'Foo')));
+      expect(list[1], equals(FooWritable(11, 'Bar')));
+      expect(list[2], equals(FooWritable(12, 'Baz')));
     });
   });
 }

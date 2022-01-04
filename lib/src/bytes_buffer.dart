@@ -252,10 +252,10 @@ class BytesBuffer {
     return list;
   }
 
-  W readWritable<W extends Writable>(W Function(BytesBuffer input) reader) {
-    var w = reader(this);
-    return w;
-  }
+  int writeWritable(Writable writable) => writable.writeTo(this);
+
+  W readWritable<W extends Writable>(W Function(BytesBuffer input) reader) =>
+      reader(this);
 
   int writeString(String s) {
     var bs = s.encodeUTF8Bytes();

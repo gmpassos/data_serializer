@@ -1,6 +1,5 @@
 import 'dart:convert' as dart_convert;
 import 'dart:math';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:base_codecs/base_codecs.dart';
@@ -566,12 +565,14 @@ extension Uint8ListDataExtension on Uint8List {
   }
 
   MapEntry<int, BigInt> readBigInt([int offset = 0]) {
+    var byteData = asByteData();
     if (this[offset] == 0) {
-      var n = getInt32(offset + 1);
+      var n = byteData.getInt32(offset + 1);
       var bigInt = BigInt.from(n);
       return MapEntry(1 + 4, bigInt);
     } else {
-      var bs = readBlock32(offset);
+      var sz = -byteData.getInt32(offset);
+      var bs = readBytes(offset + 4, sz);
       var s = dart_convert.latin1.decode(bs);
       var bigInt = BigInt.parse(s);
       return MapEntry(4 + bs.length, bigInt);
@@ -643,63 +644,24 @@ extension Uint8ListDataExtension on Uint8List {
 
     return n1 ^ n2;
   }
-
-  int matchingBits(Uint8List other) {
-    var length = math.min(this.length, other.length);
-
-    var count = 0;
-    for (var i = 0; i < length; ++i) {
-      var b1 = this[i];
-      var b2 = other[i];
-
-      var bits = countByteEqBits(b1, b2);
-      count += bits;
-
-      if (bits < 8) break;
-    }
-
-    return count;
-  }
 }
 
-const _byteMask1 = 0x80;
-const _byteMask2 = 0xC0;
-const _byteMask3 = 0xE0;
-const _byteMask4 = 0xF0;
-const _byteMask5 = 0xF8;
-const _byteMask6 = 0xFC;
-const _byteMask7 = 0xFE;
-const _byteMask8 = 0xFF;
-
-int countByteEqBits(int a, int b) {
-  if ((a & _byteMask1) != (b & _byteMask1)) return 0;
-  if ((a & _byteMask2) != (b & _byteMask2)) return 1;
-  if ((a & _byteMask3) != (b & _byteMask3)) return 2;
-  if ((a & _byteMask4) != (b & _byteMask4)) return 3;
-  if ((a & _byteMask5) != (b & _byteMask5)) return 4;
-  if ((a & _byteMask6) != (b & _byteMask6)) return 5;
-  if ((a & _byteMask7) != (b & _byteMask7)) return 6;
-  if ((a & _byteMask8) != (b & _byteMask8)) return 7;
-  return 8;
-}
-
-extension JBigIntDataExtension on BigInt {
+extension BigIntDataExtension on BigInt {
   Uint8List toBytes() {
     if (bitLength > 32) {
       var latin1 = toString().encodeLatin1Bytes();
 
-      var bs = Uint8List(1 + latin1.length);
-      bs[0] = 1;
-      bs.setAll(1, latin1);
+      var bs = Uint8List(4 + latin1.length);
+      var byteData = bs.asByteData();
+
+      byteData.setInt32(0, -latin1.length);
+      bs.setAll(4, latin1);
 
       return bs;
     } else {
-      var intBs = toInt().int32ToBytes();
-
-      var bs = Uint8List(1 + intBs.length);
+      var bs = Uint8List(1 + 4);
       bs[0] = 0;
-      bs.setAll(1, intBs);
-
+      bs.asByteData().setInt32(1, toInt());
       return bs;
     }
   }
@@ -709,8 +671,10 @@ extension JBigIntDataExtension on BigInt {
       var bs = toString().encodeLatin1Bytes();
       assert(bs.isNotEmpty);
 
-      var sz = out.writeBlock32(bs);
-      return sz;
+      out.writeInt32(-bs.length);
+      out.writeBytes(bs);
+
+      return 4 + bs.length;
     } else {
       var bs = toInt().int32ToBytes();
       assert(bs.length == 4);

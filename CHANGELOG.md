@@ -1,3 +1,8 @@
+## 1.0.1
+
+- Fix `BigInt` serialization.
+- Improve tests.
+
 ## 1.0.0
 
 - Initial version.
