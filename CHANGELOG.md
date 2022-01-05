@@ -1,3 +1,7 @@
+## 1.0.4
+
+- `BytesBuffer.bytesTo` now returns `R`.
+
 ## 1.0.3
 
 - Fix some documentation references.

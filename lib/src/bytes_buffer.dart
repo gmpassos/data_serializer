@@ -473,11 +473,11 @@ class BytesBuffer {
       _fromUint8List(_bytes, offset, length, _length, true);
 
   /// Calls the function [output] with the internal bytes of this instance.
-  void bytesTo(void Function(Uint8List bytes, int offset, int length) output,
+  R bytesTo<R>(R Function(Uint8List bytes, int offset, int length) output,
       [int offset = 0, int? length]) {
     length ??= _length - offset;
 
-    output(_bytes, offset, length);
+    return output(_bytes, offset, length);
   }
 
   @override
