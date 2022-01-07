@@ -480,6 +480,25 @@ class BytesBuffer {
     return output(_bytes, offset, length);
   }
 
+  /// Returns the index of [byte] inf [offset] and [length] range.
+  int indexOf(int byte, [int offset = 0, int? length]) {
+    if (offset >= _length) return -1;
+
+    length ??= _length - offset;
+
+    var end = offset + length;
+    if (end > _length) {
+      end = _length;
+    }
+
+    for (var i = offset; i < end; ++i) {
+      var b = _bytes[i];
+      if (b == byte) return i;
+    }
+
+    return -1;
+  }
+
   @override
   String toString() {
     return 'BytesBuffer{position: $_position, length: $_length, capacity: $capacity}';

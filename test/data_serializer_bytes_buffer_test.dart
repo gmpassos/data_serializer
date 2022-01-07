@@ -49,6 +49,11 @@ void main() {
       expect(buffer.position, equals(1 + 4 + 8));
       expect(buffer.capacity, equals(16));
 
+      expect(buffer.indexOf(123), equals(0));
+      expect(buffer.indexOf(3), equals(2));
+      expect(buffer.indexOf(3, 3), equals(11));
+      expect(buffer.indexOf(3, 0, 2), equals(-1));
+
       expect(buffer.writeUint64(0x02030405060708), equals(8));
       expect(
           buffer.asUint8List(),
@@ -392,9 +397,13 @@ void main() {
       expect(buffer.capacity, equals(blocksLength));
       expect(buffer.length, equals(blocksLength));
 
+      expect(buffer.indexOf(20), equals(4 + 4 + 1));
+
       buffer.reset();
       expect(buffer.length, equals(0));
       expect(buffer.position, equals(0));
+
+      expect(buffer.indexOf(20), equals(-1));
 
       expect(() => buffer.readBlocks(), throwsA(isA<BytesBufferEOF>()));
     });

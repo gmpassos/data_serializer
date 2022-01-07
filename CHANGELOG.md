@@ -1,3 +1,7 @@
+## 1.0.5
+
+- Added `BytesBuffer.indexOf`.
+
 ## 1.0.4
 
 - `BytesBuffer.bytesTo` now returns `R`.
