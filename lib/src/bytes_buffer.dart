@@ -491,6 +491,10 @@ class BytesBuffer {
       end = _length;
     }
 
+    if (end == _bytes.length) {
+      return _bytes.indexOf(byte, offset);
+    }
+
     for (var i = offset; i < end; ++i) {
       var b = _bytes[i];
       if (b == byte) return i;
