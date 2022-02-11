@@ -38,37 +38,43 @@ class DataSerializerPlatformIO extends DataSerializerPlatform {
   bool isSafeInteger(int n) => true;
 
   @override
-  void setUint64(ByteData data, int n, [int offset = 0]) =>
-      data.setUint64(offset, n, Endian.big);
+  void setUint64(ByteData data, int n,
+          [int offset = 0, Endian endian = Endian.big]) =>
+      data.setUint64(offset, n, endian);
 
   @override
-  void setInt64(ByteData data, int n, [int offset = 0]) =>
-      data.setInt64(offset, n, Endian.big);
+  void setInt64(ByteData data, int n,
+          [int offset = 0, Endian endian = Endian.big]) =>
+      data.setInt64(offset, n, endian);
 
   @override
-  int getUint64(ByteData data, [int offset = 0]) => data.getUint64(offset);
+  int getUint64(ByteData data, [int offset = 0, Endian endian = Endian.big]) =>
+      data.getUint64(offset, endian);
 
   @override
-  int getInt64(ByteData data, [int offset = 0]) => data.getInt64(offset);
+  int getInt64(ByteData data, [int offset = 0, Endian endian = Endian.big]) =>
+      data.getInt64(offset, endian);
 
   @override
-  void writeUint64(Uint8List out, int n, [int offset = 0]) {
-    out.asByteData().setUint64(offset, n, Endian.big);
+  void writeUint64(Uint8List out, int n,
+      [int offset = 0, Endian endian = Endian.big]) {
+    out.asByteData().setUint64(offset, n, endian);
   }
 
   @override
-  void writeInt64(Uint8List out, int n, [int offset = 0]) {
-    out.asByteData().setInt64(offset, n, Endian.big);
+  void writeInt64(Uint8List out, int n,
+      [int offset = 0, Endian endian = Endian.big]) {
+    out.asByteData().setInt64(offset, n, endian);
   }
 
   @override
-  int readUint64(Uint8List out, [int offset = 0]) {
-    return out.asByteData().getUint64(offset, Endian.big);
+  int readUint64(Uint8List out, [int offset = 0, Endian endian = Endian.big]) {
+    return out.asByteData().getUint64(offset, endian);
   }
 
   @override
-  int readInt64(Uint8List out, [int offset = 0]) {
-    return out.asByteData().getInt64(offset, Endian.big);
+  int readInt64(Uint8List out, [int offset = 0, Endian endian = Endian.big]) {
+    return out.asByteData().getInt64(offset, endian);
   }
 }
 

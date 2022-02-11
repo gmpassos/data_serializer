@@ -1,3 +1,9 @@
+## 1.0.6
+
+- `DataSerializerPlatform`, and `Uint8ListDataExtension`:
+  - `getInt16/32/64` and `getUint16/32/64`:
+    - Added parameter `endian` to allow `Endian.little`.
+
 ## 1.0.5
 
 - Added `BytesBuffer.indexOf`.

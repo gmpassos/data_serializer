@@ -51,19 +51,23 @@ abstract class DataSerializerPlatform {
     return '$type out of safe `int` range (platform with $safeIntBits bits precision): minSafe:$minSafeInt < n:$n < maxSafe:$maxSafeInt';
   }
 
-  void setUint64(ByteData data, int n, [int offset = 0]);
+  void setUint64(ByteData data, int n,
+      [int offset = 0, Endian endian = Endian.big]);
 
-  void setInt64(ByteData data, int n, [int offset = 0]);
+  void setInt64(ByteData data, int n,
+      [int offset = 0, Endian endian = Endian.big]);
 
-  int getUint64(ByteData data, [int offset = 0]);
+  int getUint64(ByteData data, [int offset = 0, Endian endian = Endian.big]);
 
-  int getInt64(ByteData data, [int offset = 0]);
+  int getInt64(ByteData data, [int offset = 0, Endian endian = Endian.big]);
 
-  void writeUint64(Uint8List out, int n, [int offset = 0]);
+  void writeUint64(Uint8List out, int n,
+      [int offset = 0, Endian endian = Endian.big]);
 
-  void writeInt64(Uint8List out, int n, [int offset = 0]);
+  void writeInt64(Uint8List out, int n,
+      [int offset = 0, Endian endian = Endian.big]);
 
-  int readUint64(Uint8List out, [int offset = 0]);
+  int readUint64(Uint8List out, [int offset = 0, Endian endian = Endian.big]);
 
-  int readInt64(Uint8List out, [int offset = 0]);
+  int readInt64(Uint8List out, [int offset = 0, Endian endian = Endian.big]);
 }

@@ -499,14 +499,16 @@ extension Uint8ListDataExtension on Uint8List {
   int getUint8([int byteOffset = 0]) => asByteData().getUint8(byteOffset);
 
   /// Returns a `Uint16` at [byteOffset] of this bytes buffer (reads 2 bytes).
-  int getUint16([int byteOffset = 0]) => asByteData().getUint16(byteOffset);
+  int getUint16([int byteOffset = 0, Endian endian = Endian.big]) =>
+      asByteData().getUint16(byteOffset, endian);
 
   /// Returns a `Uint32` at [byteOffset] of this bytes buffer (reads 4 bytes).
-  int getUint32([int byteOffset = 0]) => asByteData().getUint32(byteOffset);
+  int getUint32([int byteOffset = 0, Endian endian = Endian.big]) =>
+      asByteData().getUint32(byteOffset, endian);
 
   /// Returns a `Uint64` at [byteOffset] of this bytes buffer (reads 8 bytes).
-  int getUint64([int byteOffset = 0]) {
-    return _platform.readUint64(this, byteOffset);
+  int getUint64([int byteOffset = 0, Endian endian = Endian.big]) {
+    return _platform.readUint64(this, byteOffset, endian);
   }
 
   /// Returns a `Int8` at [byteOffset] of this bytes buffer (reads 1 byte).

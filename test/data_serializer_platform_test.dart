@@ -141,25 +141,28 @@ void main() {
     test(
       'test sequence',
       () {
-        print('** Testing numbers sequence...');
+        for (var endian in [Endian.big, Endian.little]) {
+          print(
+              '** Testing numbers sequence (${endian == Endian.big ? 'BE' : 'LE'})...');
 
-        var total = 0;
-        for (var n = 0xAA; n < 0xFFFFFFFFFF; n += (255 * 255 * 3)) {
-          var bs1 = Uint8List(8);
-          var bs2 = Uint8List(8);
+          var total = 0;
+          for (var n = 0xAA; n < 0xFFFFFFFFFF; n += (255 * 255 * 3)) {
+            var bs1 = Uint8List(8);
+            var bs2 = Uint8List(8);
 
-          p.writeUint64(bs1, n);
-          p.writeInt64(bs2, n);
+            p.writeUint64(bs1, n, 0, endian);
+            p.writeInt64(bs2, n, 0, endian);
 
-          var nRead1 = p.readUint64(bs1);
-          var nRead2 = p.readUint64(bs1);
+            var nRead1 = p.readUint64(bs1, 0, endian);
+            var nRead2 = p.readUint64(bs1, 0, endian);
 
-          expect(nRead1, equals(n));
-          expect(nRead2, equals(n));
-          total++;
+            expect(nRead1, equals(n));
+            expect(nRead2, equals(n));
+            total++;
+          }
+
+          print('-- Tested $total numbers.');
         }
-
-        print('-- Tested $total numbers.');
       },
       //skip: true,
     );
