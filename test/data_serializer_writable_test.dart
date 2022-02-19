@@ -1,10 +1,7 @@
-@Tags(['bytes'])
-import 'dart:typed_data';
-
 import 'package:data_serializer/data_serializer.dart';
 import 'package:test/test.dart';
 
-class FooWritable implements Writable {
+class FooWritable extends Writable {
   final int id;
   final String name;
 
@@ -15,9 +12,6 @@ class FooWritable implements Writable {
     var name = input.readString();
     return FooWritable(id, name);
   }
-
-  @override
-  Uint8List serialize() => Writable.doSerialize(this);
 
   @override
   int get serializeBufferLength => 4 + 4 + name.length;
@@ -43,6 +37,22 @@ class FooWritable implements Writable {
 
 void main() {
   group('Writable', () {
+    test('basic', () {
+      var o1 = FooWritable(10, 'Foo');
+
+      var bs = Writable.doSerialize(o1);
+
+      expect(bs, equals(o1.serialize()));
+
+      var buffer = bs.toBytesBuffer();
+
+      var o2 = buffer.readWritable((input) => FooWritable.deserialize(input));
+
+      expect(o1, equals(o2));
+
+      expect(o1.serializeBufferLength, greaterThan(8));
+    });
+
     test('writeWritable/readWritable', () {
       var buffer = BytesBuffer();
 

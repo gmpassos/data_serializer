@@ -1,3 +1,16 @@
+## 1.0.7
+
+- `ListIntDataExtension`:
+  - Added `toInt8List`, `toUint16List`, `toInt16List`,
+    `toUint32List`, `toInt32List`,`toUint64List`, `toInt64List`.
+  - Added `asInt8List``asUint16List`, `asInt16List`,
+    `asUint32List`, `asInt32List`, `asUint64List`, `asInt64List`.
+- New `ListGenericExtension`:
+  - `reversedList`, `copyTo`, `copy`, `asUnmodifiableView`, `reverseChunks`
+- - `Uint8ListDataExtension`: added `toUint32List`.
+- New `ByteDataExtension`, `Uint32ListDataExtension` and `Uint64ListDataExtension`.
+- Improved tests.
+
 ## 1.0.6
 
 - `DataSerializerPlatform`, and `Uint8ListDataExtension`:

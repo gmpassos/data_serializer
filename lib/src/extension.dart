@@ -259,14 +259,77 @@ extension StringDataExtension on String {
 
 /// Data Extension for `List<int>`.
 extension ListIntDataExtension on List<int> {
-  /// Same as [encodeUint8List].
-  Uint8List toUint8List() => encodeUint8List();
+  /// Encapsulates a copy of this `int` [List] into a [Uint8List].
+  Uint8List toUint8List() => Uint8List.fromList(this);
 
-  /// Ensures that this [List] is a [Uint8List].
+  /// Encapsulates a copy of this `int` [List] into a [Int8List].
+  Int8List toInt8List() => Int8List.fromList(this);
+
+  /// Encapsulates a copy of this `int` [List] into a [Uint16List].
+  Uint16List toUint16List() => Uint16List.fromList(this);
+
+  /// Encapsulates a copy of this `int` [List] into a [Int16List].
+  Int16List toInt16List() => Int16List.fromList(this);
+
+  /// Encapsulates a copy of this `int` [List] into a [Uint32List].
+  Uint32List toUint32List() => Uint32List.fromList(this);
+
+  /// Encapsulates a copy of this `int` [List] into a [Int32List].
+  Int32List toInt32List() => Int32List.fromList(this);
+
+  /// Encapsulates a copy of this `int` [List] into a [Uint64List].
+  Uint64List toUint64List() => Uint64List.fromList(this);
+
+  /// Encapsulates a copy of this `int` [List] into a [Int64List].
+  Int64List toInt64List() => Int64List.fromList(this);
+
+  /// Ensures that this [List] is an [Uint8List].
   ///
-  /// Calls [encodeUint8List] if needed, or just cast to [Uint8List].
+  /// Calls [toUint8List] if needed, or just cast to [Uint8List].
   Uint8List get asUint8List =>
-      this is Uint8List ? (this as Uint8List) : encodeUint8List();
+      this is Uint8List ? (this as Uint8List) : toUint8List();
+
+  /// Ensures that this [List] is an [Int8List].
+  ///
+  /// Calls [toInt8List] if needed, or just cast to [Int8List].
+  Int8List get asInt8List =>
+      this is Int8List ? (this as Int8List) : toInt8List();
+
+  /// Ensures that this [List] is an [Uint16List].
+  ///
+  /// Calls [toUint16List] if needed, or just cast to [Uint16List].
+  Uint16List get asUint16List =>
+      this is Uint16List ? (this as Uint16List) : toUint16List();
+
+  /// Ensures that this [List] is an [Int16List].
+  ///
+  /// Calls [toInt16List] if needed, or just cast to [Int16List].
+  Int16List get asInt16List =>
+      this is Int16List ? (this as Int16List) : toInt16List();
+
+  /// Ensures that this [List] is an [Uint32List].
+  ///
+  /// Calls [toUint32List] if needed, or just cast to [Uint32List].
+  Uint32List get asUint32List =>
+      this is Uint32List ? (this as Uint32List) : toUint32List();
+
+  /// Ensures that this [List] is an [Int32List].
+  ///
+  /// Calls [toUint32List] if needed, or just cast to [Int32List].
+  Int32List get asInt32List =>
+      this is Int32List ? (this as Int32List) : toInt32List();
+
+  /// Ensures that this [List] is an [Uint64List].
+  ///
+  /// Calls [toUint64List] if needed, or just cast to [Uint64List].
+  Uint64List get asUint64List =>
+      this is Uint64List ? (this as Uint64List) : toUint64List();
+
+  /// Ensures that this [List] is an [Int64List].
+  ///
+  /// Calls [toUint64List] if needed, or just cast to [Int64List].
+  Int64List get asInt64List =>
+      this is Int64List ? (this as Int64List) : toInt64List();
 
   /// Encodes this [List] to a [Uint8List] of `Uint8`.
   Uint8List encodeUint8List() => Uint8List.fromList(this);
@@ -324,6 +387,86 @@ extension ListIntDataExtension on List<int> {
 
     return bs;
   }
+}
+
+extension ListGenericExtension<T> on List<T> {
+  /// Returns a copy of this instance as a reversed [List] of `T`.
+  List<T> reversedList() => reversed.toList();
+
+  /// Copy [length] from [srcOffset] of `this` [List] to [dst] at [dstOffset].
+  ///
+  /// - This is the classic `C/C++` buffer copy style.
+  void copyTo(int srcOffset, List<T> dst, int dstOffset, int length) {
+    if (srcOffset == 0 && length == this.length) {
+      dst.setAll(dstOffset, this);
+    } else {
+      dst.setRange(dstOffset, dstOffset + length, this, srcOffset);
+    }
+  }
+
+  /// Returns a copy of this [List].
+  ///
+  /// - It tries to preserve the type if it's an
+  ///   [Uint8List], [Uint16List], [Uint32List] or [Uint64List].
+  List<T> copy() {
+    if (this is Uint8List) {
+      return Uint8List.fromList(this as Uint8List) as List<T>;
+    } else if (this is Int8List) {
+      return Int8List.fromList(this as Int8List) as List<T>;
+    } else if (this is Uint16List) {
+      return Uint16List.fromList(this as Uint16List) as List<T>;
+    } else if (this is Int16List) {
+      return Int16List.fromList(this as Int16List) as List<T>;
+    } else if (this is Uint32List) {
+      return Uint32List.fromList(this as Uint32List) as List<T>;
+    } else if (this is Int32List) {
+      return Int32List.fromList(this as Int32List) as List<T>;
+    } else if (this is Uint64List) {
+      return Uint64List.fromList(this as Uint64List) as List<T>;
+    } else if (this is Int64List) {
+      return Int64List.fromList(this as Int64List) as List<T>;
+    } else {
+      return List<T>.from(this);
+    }
+  }
+
+  /// Returns an unmodifiable view of `this` instance.
+  ///
+  /// - Will just cast if is already an [UnmodifiableListView].
+  UnmodifiableListView<T> get asUnmodifiableView {
+    var self = this;
+    return self is UnmodifiableListView<T>
+        ? self
+        : UnmodifiableListView<T>(self);
+  }
+
+  /// Returns a copy of this [List] with
+  /// chunks of length [chunkSize] in reversed order.
+  ///
+  /// - Useful to reverse endianness of integers in a byte buffer.
+  /// - If [chunkSize] `== 1` will return a [copy] of this instance.
+  List<T> reverseChunks(int chunkSize) {
+    if (chunkSize == 1) {
+      return copy();
+    }
+
+    return List.generate(length, (i) {
+      var chunkI = i % chunkSize;
+      var chunkOffset = i - chunkI;
+      var chunkIReversed = (chunkSize - 1) - chunkI;
+      var idx = chunkOffset + chunkIReversed;
+      return this[idx];
+    });
+  }
+}
+
+/// Extension for [Endian].
+extension EndianExtension on Endian {
+  /// Returns `true` if this instance is Big-Endian.
+  bool get isBigEndian => this == Endian.big;
+
+  /// Returns `true` if this instance is Little-Endian.
+  bool get isLittleEndian => this == Endian.little;
 }
 
 /// Data Extension for [Uint8List].
@@ -702,6 +845,268 @@ extension Uint8ListDataExtension on Uint8List {
     }
 
     return sublist(myLength - length, myLength);
+  }
+
+  /// Converts this instance to an [Uint16List].
+  Uint16List convertToUint16List([Endian endian = Endian.big]) =>
+      asByteData().convertToUint16List(length ~/ 2, endian);
+
+  /// Converts this instance to an [Uint32List].
+  Uint32List convertToUint32List([Endian endian = Endian.big]) =>
+      asByteData().convertToUint32List(length ~/ 4, endian);
+
+  /// Converts this instance to an [Uint64List].
+  Uint64List convertToUint64List([Endian endian = Endian.big]) =>
+      asByteData().convertToUint64List(length ~/ 8, endian);
+}
+
+/// Data extension for [Uint32List].
+extension Uint32ListDataExtension on Uint32List {
+  /// Returns a copy of this instance as a reversed [Uint32List].
+  Uint32List reversedList() => Uint32List.fromList(reversed.toList());
+
+  /// Returns a [ByteData] of `this` [buffer] with the respective offset and length.
+  ByteData asByteData() => buffer.asByteData(offsetInBytes, lengthInBytes);
+
+  /// Returns a copy of `this` instance.
+  Uint32List copy() => Uint32List.fromList(this);
+
+  /// Returns an unmodifiable copy of `this` instance.
+  Uint32List copyAsUnmodifiable() => UnmodifiableUint32ListView(copy());
+
+  /// Returns an unmodifiable view of `this` instance.
+  ///
+  /// - Will just cast if is already an [UnmodifiableUint32ListView].
+  UnmodifiableUint32ListView get asUnmodifiableView {
+    var self = this;
+    return self is UnmodifiableUint32ListView
+        ? self
+        : UnmodifiableUint32ListView(self);
+  }
+
+  /// Converts this instance to an [Uint8List] with elements in [endian]ness.
+  Uint8List convertToUint8List([Endian endian = Endian.big]) {
+    if (Endian.host == endian) {
+      return convertToUint8ListHostEndian();
+    } else {
+      return convertToUint8ListReversedEndian();
+    }
+  }
+
+  /// Converts this instance to an [Uint8List] with elements in endianness
+  /// of [Endian.host] (current [buffer] endianness).
+  Uint8List convertToUint8ListHostEndian() =>
+      asByteData().convertToUint8List(length * 4);
+
+  /// Converts this instance to an [Uint8List] with elements in reversed endianness.
+  Uint8List convertToUint8ListReversedEndian() {
+    var list = convertToUint8ListHostEndian();
+
+    var length = list.length;
+    for (var i = 0; i < length; i += 4) {
+      var n0 = list[i];
+      var n1 = list[i + 1];
+      var n2 = list[i + 2];
+      var n3 = list[i + 3];
+
+      list[i] = n3;
+      list[i + 1] = n2;
+      list[i + 2] = n1;
+      list[i + 3] = n0;
+    }
+
+    return list;
+  }
+
+  ByteData _byteDataWithEndian(Endian endian) {
+    if (Endian.host == endian) {
+      return Uint8List.fromList(convertToUint8ListHostEndian().reverseChunks(4))
+          .asByteData();
+    } else {
+      return convertToUint8ListReversedEndian().asByteData();
+    }
+  }
+
+  /// Converts this instance to an [Uint16List].
+  Uint16List convertToUint16List([Endian endian = Endian.big]) =>
+      _byteDataWithEndian(endian).convertToUint16List(length * 2, endian);
+
+  /// Converts this instance to an [Uint64List].
+  Uint64List convertToUint64List([Endian endian = Endian.big]) =>
+      _byteDataWithEndian(endian).convertToUint64List(length ~/ 2, endian);
+
+  /// Coverts this [Uint32List] elements to a sequence of [String] of 32 bits HEX.
+  String toHex32([String separator = ' ']) =>
+      map((n) => n.toHex32()).join(separator);
+
+  /// Coverts this [Uint32List] elements to a sequence of [String] of 32 bits.
+  String toBits32([String separator = ' ']) =>
+      map((n) => n.bits32).join(separator);
+}
+
+/// Data extension for [Uint64List].
+extension Uint64ListDataExtension on Uint64List {
+  /// Returns a copy of this instance as a reversed [Uint64List].
+  Uint64List reversedList() => Uint64List.fromList(reversed.toList());
+
+  /// Returns a [ByteData] of `this` [buffer] with the respective offset and length.
+  ByteData asByteData() => buffer.asByteData(offsetInBytes, lengthInBytes);
+
+  /// Returns a copy of `this` instance.
+  Uint64List copy() => Uint64List.fromList(this);
+
+  /// Returns an unmodifiable copy of `this` instance.
+  Uint64List copyAsUnmodifiable() => UnmodifiableUint64ListView(copy());
+
+  /// Returns an unmodifiable view of `this` instance.
+  ///
+  /// - Will just cast if is already an [UnmodifiableUint64ListView].
+  UnmodifiableUint64ListView get asUnmodifiableView {
+    var self = this;
+    return self is UnmodifiableUint64ListView
+        ? self
+        : UnmodifiableUint64ListView(self);
+  }
+
+  /// Converts this instance to an [Uint8List] with elements in [endian]ness.
+  Uint8List convertToUint8List([Endian endian = Endian.big]) {
+    if (Endian.host == endian) {
+      return convertToUint8ListHostEndian();
+    } else {
+      return convertToUint8ListReversedEndian();
+    }
+  }
+
+  /// Converts this instance to an [Uint8List] with elements in endianness
+  /// of [Endian.host] (current [buffer] endianness).
+  Uint8List convertToUint8ListHostEndian() =>
+      asByteData().convertToUint8List(length * 8);
+
+  /// Converts this instance to an [Uint8List] with elements in reversed endianness.
+  Uint8List convertToUint8ListReversedEndian() {
+    var list = convertToUint8ListHostEndian();
+
+    var length = list.length;
+    for (var i = 0; i < length; i += 8) {
+      var n0 = list[i];
+      var n1 = list[i + 1];
+      var n2 = list[i + 2];
+      var n3 = list[i + 3];
+
+      var n4 = list[i + 4];
+      var n5 = list[i + 5];
+      var n6 = list[i + 6];
+      var n7 = list[i + 7];
+
+      list[i] = n7;
+      list[i + 1] = n6;
+      list[i + 2] = n5;
+      list[i + 3] = n4;
+
+      list[i + 4] = n3;
+      list[i + 5] = n2;
+      list[i + 6] = n1;
+      list[i + 7] = n0;
+    }
+
+    return list;
+  }
+
+  ByteData _byteDataWithEndian(Endian endian) {
+    if (Endian.host == endian) {
+      return Uint8List.fromList(convertToUint8ListHostEndian().reverseChunks(8))
+          .asByteData();
+    } else {
+      return convertToUint8ListReversedEndian().asByteData();
+    }
+  }
+
+  /// Converts this instance to an [Uint16List].
+  Uint16List convertToUint16List([Endian endian = Endian.big]) =>
+      _byteDataWithEndian(endian).convertToUint16List(length * 4, endian);
+
+  /// Converts this instance to an [Uint32List].
+  Uint32List convertToUint32List([Endian endian = Endian.big]) =>
+      _byteDataWithEndian(endian).convertToUint32List(length * 2, endian);
+
+  /// Coverts this [Uint32List] elements to a sequence of [String] of 32 bits HEX.
+  String toHex64([String separator = ' ']) =>
+      map((n) => n.toHex64()).join(separator);
+
+  /// Coverts this [Uint32List] elements to a sequence of [String] of 32 bits.
+  String toBits64([String separator = ' ']) =>
+      map((n) => n.bits64).join(separator);
+}
+
+extension ByteDataExtension on ByteData {
+  void _checkLengthRange(int length, int chunkSize) {
+    if (length < 0) {
+      throw RangeError('Negative length: $length');
+    }
+
+    if (lengthInBytes > length * chunkSize) {
+      var lengthStr =
+          chunkSize == 1 ? '`length:$length`' : '`length:$length * $chunkSize`';
+      throw RangeError('$lengthStr over buffer length ($lengthInBytes)');
+    }
+  }
+
+  /// Copies this [ByteData] buffer to an [Uint64List] of [length].
+  Uint8List convertToUint8List(int length) {
+    _checkLengthRange(length, 1);
+    return Uint8List.fromList(buffer.asUint8List(offsetInBytes, length));
+  }
+
+  /// Copies this [ByteData] buffer to an [Uint16List] of [length].
+  Uint16List convertToUint16List(int length, [Endian endian = Endian.big]) {
+    _checkLengthRange(length, 2);
+
+    if (Endian.host == endian) {
+      return Uint16List.fromList(buffer.asUint16List(offsetInBytes, length));
+    }
+
+    var ns = Uint16List(length);
+
+    for (var i = 0; i < length; ++i) {
+      ns[i] = getUint16(i * 2, endian);
+    }
+
+    return ns;
+  }
+
+  /// Copies this [ByteData] buffer to an [Uint32List] of [length].
+  Uint32List convertToUint32List(int length, [Endian endian = Endian.big]) {
+    _checkLengthRange(length, 4);
+
+    if (Endian.host == endian) {
+      return Uint32List.fromList(buffer.asUint32List(offsetInBytes, length));
+    }
+
+    var ns = Uint32List(length);
+
+    for (var i = 0; i < length; ++i) {
+      ns[i] = getUint32(i * 4, endian);
+    }
+
+    return ns;
+  }
+
+  /// Copies this [ByteData] buffer to an [Uint64List] of [length].
+  Uint64List convertToUint64List(int length, [Endian endian = Endian.big]) {
+    _checkLengthRange(length, 8);
+
+    if (Endian.host == endian) {
+      return Uint64List.fromList(buffer.asUint64List(offsetInBytes, length));
+    }
+
+    var ns = Uint64List(length);
+
+    for (var i = 0; i < length; ++i) {
+      var n = getUint64(i * 8, endian);
+      ns[i] = n;
+    }
+
+    return ns;
   }
 }
 
