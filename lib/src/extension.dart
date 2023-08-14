@@ -118,7 +118,7 @@ extension BigIntDataExtension on BigInt {
     if (width > 0) {
       if (isNegative) {
         hex = hex.substring(1);
-        return '-' + hex.padLeft(width, '0');
+        return '-${hex.padLeft(width, '0')}';
       } else {
         return hex.padLeft(width, '0');
       }
@@ -136,7 +136,7 @@ extension BigIntDataExtension on BigInt {
       }
 
       if (hex.length % 2 != 0) {
-        hex = '0' + hex;
+        hex = '0$hex';
       }
 
       var bs = hex.decodeHex();
@@ -232,7 +232,7 @@ extension StringDataExtension on String {
     var s = this;
     if (s.startsWith('-')) {
       var n = s.substring(1);
-      return '-' + n.padLeft(width, '0');
+      return '-${n.padLeft(width, '0')}';
     } else {
       return s.padLeft(width, '0');
     }
@@ -498,7 +498,7 @@ extension Uint8ListDataExtension on Uint8List {
   /// Returns a hashcode of this bytes.
   int bytesHashCode() => _listIntEquality.hash(this);
 
-  /// A sub `Uint8List` view of regeion.
+  /// A sub `Uint8List` view of region.
   Uint8List subView([int offset = 0, int? length]) {
     length ??= this.length - offset;
     return buffer.asUint8List(offset, length);

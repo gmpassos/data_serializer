@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'int_codec.dart';
 import 'platform_generic.dart' if (dart.library.io) 'platform_io.dart';
 
 abstract class DataSerializerPlatform {
@@ -57,9 +58,21 @@ abstract class DataSerializerPlatform {
   void setInt64(ByteData data, int n,
       [int offset = 0, Endian endian = Endian.big]);
 
+  void setDataTypeHandlerUint64(IntCodec data, int n,
+      [int offset = 0, Endian endian = Endian.big]);
+
+  void setDataTypeHandlerInt64(IntCodec data, int n,
+      [int offset = 0, Endian endian = Endian.big]);
+
   int getUint64(ByteData data, [int offset = 0, Endian endian = Endian.big]);
 
   int getInt64(ByteData data, [int offset = 0, Endian endian = Endian.big]);
+
+  int getDataTypeHandlerUint64(IntCodec data,
+      [int offset = 0, Endian endian = Endian.big]);
+
+  int getDataTypeHandlerInt64(IntCodec data,
+      [int offset = 0, Endian endian = Endian.big]);
 
   void writeUint64(Uint8List out, int n,
       [int offset = 0, Endian endian = Endian.big]);

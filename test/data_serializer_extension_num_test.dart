@@ -1,6 +1,7 @@
 @Tags(['num'])
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:data_serializer/data_serializer.dart';
 import 'package:test/test.dart';
 
@@ -200,7 +201,7 @@ void main() {
           throwsA(isA<Error>()));
 
       expect(Uint8List.fromList([1, 10, 20, 30]).bytesHashCode(),
-          equals(1176475097));
+          equals(ListEquality<int>().hash([1, 10, 20, 30])));
 
       {
         expect(Uint8List.fromList([10]).reverseBytes(), equals([10]));

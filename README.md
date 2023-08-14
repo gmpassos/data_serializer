@@ -3,7 +3,7 @@
 [![pub package](https://img.shields.io/pub/v/data_serializer.svg?logo=dart&logoColor=00b9fc)](https://pub.dev/packages/data_serializer)
 [![Null Safety](https://img.shields.io/badge/null-safety-brightgreen)](https://dart.dev/null-safety)
 [![Codecov](https://img.shields.io/codecov/c/github/gmpassos/data_serializer)](https://app.codecov.io/gh/gmpassos/data_serializer)
-[![CI](https://img.shields.io/github/workflow/status/gmpassos/data_serializer/Dart%20CI/master?logo=github-actions&logoColor=white)](https://github.com/gmpassos/data_serializer/actions)
+[![Dart CI](https://github.com/gmpassos/data_serializer/actions/workflows/dart.yml/badge.svg?branch=master)](https://github.com/gmpassos/data_serializer/actions/workflows/dart.yml)
 [![GitHub Tag](https://img.shields.io/github/v/tag/gmpassos/data_serializer?logo=git&logoColor=white)](https://github.com/gmpassos/data_serializer/releases)
 [![New Commits](https://img.shields.io/github/commits-since/gmpassos/data_serializer/latest?logo=git&logoColor=white)](https://github.com/gmpassos/data_serializer/network)
 [![Last Commits](https://img.shields.io/github/last-commit/gmpassos/data_serializer?logo=git&logoColor=white)](https://github.com/gmpassos/data_serializer/commits/master)
