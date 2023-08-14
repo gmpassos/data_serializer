@@ -27,8 +27,8 @@ jobs:
         run: dart run dependency_validator
       - name: Run tests
         run: dart test
-      - name: dartdoc
-        run: dartdoc --no-generate-docs
+      - name: dart doc
+        run:  dart doc --dry-run
       - name: Generate coverage report
         run: |
           dart pub global activate coverage
