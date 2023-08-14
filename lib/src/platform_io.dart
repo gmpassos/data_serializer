@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'extension.dart';
+import 'int_codec.dart';
 import 'platform.dart';
 
 class DataSerializerPlatformIO extends DataSerializerPlatform {
@@ -75,6 +76,62 @@ class DataSerializerPlatformIO extends DataSerializerPlatform {
   @override
   int readInt64(Uint8List out, [int offset = 0, Endian endian = Endian.big]) {
     return out.asByteData().getInt64(offset, endian);
+  }
+
+  @override
+  int getDataTypeHandlerInt64(IntCodec data,
+      [int offset = 0, Endian endian = Endian.big]) {
+    var n0 = data.getUint32(offset, endian);
+    var n1 = data.getUint32(offset + 4, endian);
+    if (endian.isLittleEndian) {
+      var tmp = n0;
+      n0 = n1;
+      n1 = tmp;
+    }
+    var n = (n0 << 32) | n1;
+    return n;
+  }
+
+  @override
+  int getDataTypeHandlerUint64(IntCodec data,
+      [int offset = 0, Endian endian = Endian.big]) {
+    var n0 = data.getUint32(offset, endian);
+    var n1 = data.getUint32(offset + 4, endian);
+    if (endian.isLittleEndian) {
+      var tmp = n0;
+      n0 = n1;
+      n1 = tmp;
+    }
+    var n = (n0 << 32) | n1;
+    return n;
+  }
+
+  @override
+  void setDataTypeHandlerInt64(IntCodec data, int n,
+      [int offset = 0, Endian endian = Endian.big]) {
+    var n0 = (n >> 32) & 0xFFFFFFFF;
+    var n1 = n & 0xFFFFFFFF;
+    if (endian.isLittleEndian) {
+      var tmp = n0;
+      n0 = n1;
+      n1 = tmp;
+    }
+    data.setUint32(offset, n0, endian);
+    data.setUint32(offset + 4, n1, endian);
+  }
+
+  @override
+  void setDataTypeHandlerUint64(IntCodec data, int n,
+      [int offset = 0, Endian endian = Endian.big]) {
+    var n0 = (n >> 32) & 0xFFFFFFFF;
+    var n1 = n & 0xFFFFFFFF;
+    if (endian.isLittleEndian) {
+      var tmp = n0;
+      n0 = n1;
+      n1 = tmp;
+    }
+    data.setUint32(offset, n0, endian);
+    data.setUint32(offset + 4, n1, endian);
   }
 }
 

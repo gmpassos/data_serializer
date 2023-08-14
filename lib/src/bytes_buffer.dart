@@ -1,8 +1,10 @@
 import "dart:convert";
-import "dart:math" as math;
 import 'dart:typed_data';
 
+import 'bytes_io.dart';
+import 'bytes_io_uint8list.dart';
 import 'extension.dart';
+import 'int_codec.dart';
 import 'platform.dart';
 import 'utils.dart';
 
@@ -10,97 +12,49 @@ final DataSerializerPlatform _platform = DataSerializerPlatform.instance;
 
 /// Optimized buffer of [Uint8List].
 class BytesBuffer {
-  Uint8List _bytes;
-  late ByteData _bytesData;
-  int _length = 0;
-  int _position = 0;
+  final BytesIO bytesIO;
+
+  IntCodec get _bytesData => bytesIO.bytesData;
+
+  BytesBuffer.fromIO(this.bytesIO);
 
   BytesBuffer([int initialCapacity = 32])
-      : _bytes = Uint8List(initialCapacity) {
-    _bytesData = _bytes.asByteData();
-  }
+      : bytesIO = BytesUint8ListIO(initialCapacity);
 
   BytesBuffer.from(Uint8List bytes,
       {int offset = 0, int? length, int? bufferLength, bool copyBuffer = false})
-      : _bytes = _fromUint8List(bytes, offset, length) {
-    _length = bufferLength ?? _bytes.length;
-    _bytesData = _bytes.asByteData();
-  }
-
-  static Uint8List _fromUint8List(Uint8List bytes,
-      [int offset = 0, int? length, int? bytesLength, bool copy = false]) {
-    length ??= (bytesLength ?? bytes.length) - offset;
-
-    if (offset == 0 && length == bytes.length) {
-      return copy ? bytes.copy() : bytes;
-    } else {
-      return bytes.sublist(offset, offset + length);
-    }
-  }
+      : bytesIO = BytesUint8ListIO.from(bytes,
+            offset: offset,
+            length: length,
+            bufferLength: bufferLength,
+            copyBuffer: copyBuffer);
 
   /// Returns the size of the internal bytes buffer ([Uint8List]).
-  int get capacity => _bytes.length;
+  int get capacity => bytesIO.capacity;
 
   /// The length of bytes in this buffer.
-  int get length => _length;
+  int get length => bytesIO.length;
 
   /// Returns `true` if `this` instance is empty.
-  bool get isEmpty => _length == 0;
+  bool get isEmpty => bytesIO.isEmpty;
 
   /// Returns `true` if `this` instance is NOT empty.
-  bool get isNotEmpty => _length != 0;
+  bool get isNotEmpty => bytesIO.isNotEmpty;
 
   /// The current read/write cursor position in the bytes buffer.
-  int get position => _position;
+  int get position => bytesIO.position;
 
   /// The remaining bytes to read from [position] to the end of the buffer.
-  int get remaining => _length - _position;
-
-  void _ensureCapacity(int needed) {
-    if (capacity < needed) {
-      var newCapacity = math.max(capacity * 2, needed);
-      var bs = Uint8List(newCapacity);
-      bs.setAll(0, _bytes);
-      _bytes = bs;
-      _bytesData = _bytes.asByteData();
-    }
-  }
+  int get remaining => bytesIO.remaining;
 
   /// Changes the read/write cursor [position].
-  int seek(int position) {
-    if (position < 0) {
-      position = 0;
-    } else if (position > _length) {
-      position = _length;
-    }
-    _position = position;
-    return position;
-  }
-
-  void _incrementPosition(int length) {
-    _position += length;
-    if (_position > _length) {
-      _length = _position;
-    }
-  }
+  int seek(int position) => bytesIO.seek(position);
 
   /// Writes 1 byte. Increments [position] by 1.
-  int writeByte(int b) {
-    _ensureCapacity(_position + 1);
-
-    _bytes[_position] = b;
-    _incrementPosition(1);
-
-    return 1;
-  }
+  int writeByte(int b) => bytesIO.writeByte(b);
 
   /// Reads 1 byte. Increments [position] by 1.
-  int readByte() {
-    _checkCanRead(1);
-    var b = _bytes[_position];
-    _incrementPosition(1);
-    return b;
-  }
+  int readByte() => bytesIO.readByte();
 
   /// Writes 1 boolean byte. Increments [position] by 1.
   int writeBoolean(bool b) => writeByte(b ? 1 : 0);
@@ -128,76 +82,32 @@ class BytesBuffer {
   }
 
   /// Writes all the `int` at [list] as bytes.
-  int writeAll(List<int> list) {
-    var bsLength = list.length;
-
-    _ensureCapacity(_position + bsLength);
-
-    _bytes.setAll(_position, list);
-    _incrementPosition(bsLength);
-
-    return bsLength;
-  }
+  int writeAll(List<int> list) => bytesIO.writeAll(list);
 
   /// Writes the `int` at [list] as bytes, respecting [offset] and [length] parameters.
-  int write(List<int> list, [int offset = 0, int? length]) {
-    length ??= list.length - offset;
-
-    _ensureCapacity(_position + length);
-
-    _bytes.setRange(_position, _position + length, list, offset);
-    _incrementPosition(length);
-
-    return length;
-  }
+  int write(List<int> list, [int offset = 0, int? length]) =>
+      bytesIO.write(list, offset, length);
 
   /// Writes all the [bytes] into this buffer.
-  int writeAllBytes(Uint8List bytes) {
-    var length = bytes.length;
-
-    _ensureCapacity(_position + length);
-
-    _bytes.setAll(_position, bytes);
-    _incrementPosition(length);
-
-    return length;
-  }
+  int writeAllBytes(Uint8List bytes) => bytesIO.writeAllBytes(bytes);
 
   /// Writes the [bytes] into this buffer, respecting [offset] and [length] parameters.
-  int writeBytes(Uint8List bs, [int offset = 0, int? length]) {
-    length ??= bs.length - offset;
-
-    _ensureCapacity(_position + length);
-
-    _bytes.setRange(_position, _position + length, bs, offset);
-    _incrementPosition(length);
-
-    return length;
-  }
+  int writeBytes(Uint8List bs, [int offset = 0, int? length]) =>
+      bytesIO.writeBytes(bs, offset, length);
 
   /// Reads an [Uint8List] of [length].
-  Uint8List readBytes(int length) {
-    _checkCanRead(length);
-    var bs = _bytes.sublist(_position, _position + length);
-    _incrementPosition(length);
-    return bs;
-  }
+  Uint8List readBytes(int length) => bytesIO.readBytes(length);
 
   /// Reads the remaining bytes.
   /// See [remaining] and [readBytes].
   Uint8List readRemainingBytes() => readBytes(remaining);
 
-  void _checkCanRead(int length) {
-    if (_position + length > _length) {
-      throw BytesBufferEOF();
-    }
-  }
-
   /// Writes a blocks of data using a 32-bit integer as length prefix.
   int writeBlock32(Uint8List bs, [int offset = 0, int? length]) {
     length ??= bs.length - offset;
 
-    _ensureCapacity(_position + 4 + length);
+    final pos = position;
+    bytesIO.ensureCapacity(pos + 4 + length);
 
     var sz = writeUint32(length);
     writeBytes(bs, offset, length);
@@ -207,9 +117,9 @@ class BytesBuffer {
 
   /// Reads a blocks of data that uses a 32-bit integer as length prefix.
   Uint8List readBlock32() {
-    _checkCanRead(4);
-    var sz = _bytesData.getUint32(_position);
-    _incrementPosition(4);
+    bytesIO.checkCanRead(4);
+    var sz = _bytesData.getUint32(position, Endian.big);
+    bytesIO.incrementPosition(4);
     return readBytes(sz);
   }
 
@@ -217,19 +127,20 @@ class BytesBuffer {
   int writeBlock16(Uint8List bs, [int offset = 0, int? length]) {
     length ??= bs.length - offset;
 
-    _ensureCapacity(_position + 2 + length);
+    final pos = position;
+    bytesIO.ensureCapacity(pos + 2 + length);
 
     var sz = writeUint16(length);
-    writeBytes(bs, offset, length);
+    bytesIO.writeBytes(bs, offset, length);
 
     return sz + length;
   }
 
   /// Reads a blocks of data that uses a 16-bit integer as length prefix.
   Uint8List readBlock16() {
-    _checkCanRead(2);
-    var sz = _bytesData.getUint16(_position);
-    _incrementPosition(2);
+    bytesIO.checkCanRead(2);
+    var sz = _bytesData.getUint16(position, Endian.big);
+    bytesIO.incrementPosition(2);
     return readBytes(sz);
   }
 
@@ -240,7 +151,9 @@ class BytesBuffer {
         : blocks
             .map((e) => e.length)
             .reduce((value, element) => value + 4 + element);
-    _ensureCapacity(_position + 4 + blocksSz);
+
+    final writeSz = 4 + 4 + blocksSz;
+    bytesIO.ensureCapacity(bytesIO.position + writeSz);
 
     writeInt32(blocks.length);
     var sz = 4;
@@ -263,7 +176,7 @@ class BytesBuffer {
   int writeWritables(Iterable<Writable> list) {
     var length = list.length;
 
-    _ensureCapacity(_position + 4 + (length * 8));
+    bytesIO.ensureCapacity(position + 4 + (length * 8));
 
     writeInt32(length);
     var sz = 4;
@@ -308,97 +221,109 @@ class BytesBuffer {
 
   /// Writes an [Int16].
   int writeInt16(int n, [Endian endian = Endian.big]) {
-    _ensureCapacity(_position + 2);
-    _bytesData.setInt16(_position, n, endian);
-    _incrementPosition(2);
+    final pos = bytesIO.position;
+    bytesIO.ensureCapacity(pos + 2);
+    _bytesData.setInt16(pos, n, endian);
+    bytesIO.incrementPosition(2);
     return 2;
   }
 
   /// Reads an [Int16].
   int readInt16([Endian endian = Endian.big]) {
-    _checkCanRead(2);
-    var n = _bytesData.getInt16(_position, endian);
-    _incrementPosition(2);
+    bytesIO.checkCanRead(2);
+    final pos = bytesIO.position;
+    var n = _bytesData.getInt16(pos, endian);
+    bytesIO.incrementPosition(2);
     return n;
   }
 
   /// Writes an [Uint16].
   int writeUint16(int n, [Endian endian = Endian.big]) {
-    _ensureCapacity(_position + 2);
-    _bytesData.setUint16(_position, n, endian);
-    _incrementPosition(2);
+    final pos = bytesIO.position;
+    bytesIO.ensureCapacity(pos + 2);
+    _bytesData.setUint16(pos, n, endian);
+    bytesIO.incrementPosition(2);
     return 2;
   }
 
   /// Reads an [Uint16].
   int readUint16([Endian endian = Endian.big]) {
-    _checkCanRead(2);
-    var n = _bytesData.getUint16(_position, endian);
-    _incrementPosition(2);
+    bytesIO.checkCanRead(2);
+    final pos = bytesIO.position;
+    var n = _bytesData.getUint16(pos, endian);
+    bytesIO.incrementPosition(2);
     return n;
   }
 
   /// Writes an [Int32].
   int writeInt32(int n, [Endian endian = Endian.big]) {
-    _ensureCapacity(_position + 4);
-    _bytesData.setInt32(_position, n, endian);
-    _incrementPosition(4);
+    final pos = bytesIO.position;
+    bytesIO.ensureCapacity(pos + 4);
+    _bytesData.setInt32(pos, n, endian);
+    bytesIO.incrementPosition(4);
     return 4;
   }
 
   /// Reads an [Int32].
   int readInt32([Endian endian = Endian.big]) {
-    _checkCanRead(4);
-    var n = _bytesData.getInt32(_position, endian);
-    _incrementPosition(4);
+    bytesIO.checkCanRead(4);
+    final pos = bytesIO.position;
+    var n = _bytesData.getInt32(pos, endian);
+    bytesIO.incrementPosition(4);
     return n;
   }
 
   /// Writes an [Uint32].
   int writeUint32(int n, [Endian endian = Endian.big]) {
-    _ensureCapacity(_position + 4);
-    _bytesData.setUint32(_position, n, endian);
-    _incrementPosition(4);
+    final pos = bytesIO.position;
+    bytesIO.ensureCapacity(pos + 4);
+    _bytesData.setUint32(pos, n, endian);
+    bytesIO.incrementPosition(4);
     return 4;
   }
 
   /// Reads an [Uint32].
   int readUint32([Endian endian = Endian.big]) {
-    _checkCanRead(4);
-    var n = _bytesData.getUint32(_position, endian);
-    _incrementPosition(4);
+    bytesIO.checkCanRead(4);
+    final pos = bytesIO.position;
+    var n = _bytesData.getUint32(pos, endian);
+    bytesIO.incrementPosition(4);
     return n;
   }
 
   /// Writes an [Int64].
   int writeInt64(int n, [Endian endian = Endian.big]) {
-    _ensureCapacity(_position + 8);
-    _platform.setInt64(_bytesData, n, _position);
-    _incrementPosition(8);
+    final pos = bytesIO.position;
+    bytesIO.ensureCapacity(pos + 8);
+    _platform.setDataTypeHandlerInt64(_bytesData, n, pos);
+    bytesIO.incrementPosition(8);
     return 8;
   }
 
   /// Reads an [Int64].
   int readInt64([Endian endian = Endian.big]) {
-    _checkCanRead(8);
-    var n = _platform.getInt64(_bytesData, _position);
-    _incrementPosition(8);
+    bytesIO.checkCanRead(8);
+    final pos = bytesIO.position;
+    var n = _platform.getDataTypeHandlerInt64(_bytesData, pos);
+    bytesIO.incrementPosition(8);
     return n;
   }
 
   /// Writes an [Uint64].
   int writeUint64(int n, [Endian endian = Endian.big]) {
-    _ensureCapacity(_position + 8);
-    _platform.setUint64(_bytesData, n, _position);
-    _incrementPosition(8);
+    final pos = bytesIO.position;
+    bytesIO.ensureCapacity(pos + 8);
+    _platform.setDataTypeHandlerUint64(_bytesData, n, pos);
+    bytesIO.incrementPosition(8);
     return 8;
   }
 
   /// Reads an [Uint64].
   int readUint64([Endian endian = Endian.big]) {
-    _checkCanRead(8);
-    var n = _platform.getUint64(_bytesData, _position);
-    _incrementPosition(8);
+    bytesIO.checkCanRead(8);
+    final pos = bytesIO.position;
+    var n = _platform.getDataTypeHandlerUint64(_bytesData, pos);
+    bytesIO.incrementPosition(8);
     return n;
   }
 
@@ -409,115 +334,68 @@ class BytesBuffer {
 
   /// Reads a [BigInt]. See [BigIntExtension.toBytes] for encoding description.
   BigInt readBigInt() {
-    _checkCanRead(5);
+    bytesIO.checkCanRead(5);
+
     try {
-      var ret = _bytes.readBigInt(_position);
-      var sz = ret.key;
-      _checkCanRead(sz);
-      var bigInt = ret.value;
-      _incrementPosition(sz);
-      return bigInt;
+      final pos0 = bytesIO.position;
+
+      final b0 = readByte();
+      if (b0 == 0) {
+        var n = readInt32();
+        var bigInt = BigInt.from(n);
+        return bigInt;
+      } else {
+        seek(pos0);
+        var sz = -readInt32();
+        var bs = readBytes(sz);
+        var s = latin1.decode(bs);
+        var bigInt = BigInt.parse(s);
+        return bigInt;
+      }
     } catch (_) {
       throw BytesBufferEOF();
     }
   }
 
   /// Writes a [DateTime].
-  int writeDateTime(DateTime time) => time.writeTo(this);
+  int writeDateTime(DateTime dateTime) => dateTime.writeTo(this);
 
   /// Reads a [DateTime].
   DateTime readDateTime() {
-    _checkCanRead(8);
-    var t = _bytes.readDateTime(_position);
-    _incrementPosition(8);
-    return t;
+    var t = readInt64();
+    return DateTime.fromMillisecondsSinceEpoch(t, isUtc: true);
   }
 
   /// Sets the [length] of this buffer. Increases internal bytes buffer [capacity] if needed.
-  void setLength(int length) {
-    if (length < 0) {
-      length = 0;
-    } else if (length > _bytes.length) {
-      _ensureCapacity(length);
-    }
-    _length = length;
-    if (_position > _length) {
-      _position = _length;
-    }
-  }
+  void setLength(int length) => bytesIO.setLength(length);
 
   /// Resets this buffer. Sets the [length] and [position] to `0`.
-  void reset() {
-    _length = 0;
-    _position = 0;
-  }
+  void reset() => bytesIO.reset();
 
   /// Compact the internal bytes [capacity] to [length].
-  bool compact() {
-    if (_length < _bytes.length) {
-      _bytes = _bytes.sublist(0, _length);
-      _bytesData = _bytes.asByteData();
-      return true;
-    }
-    return false;
-  }
+  bool compact() => bytesIO.compact();
 
   /// Returns `this` instance as a [Uint8List]. Returns the internal `bytes`
   /// buffer if the [length] and [capacity] is the same, otherwise creates a
   /// copy with the exact [length].
   Uint8List asUint8List([int offset = 0, int? length]) =>
-      _fromUint8List(_bytes, offset, length, _length);
+      bytesIO.asUint8List(offset, length);
 
   /// Returns a copy of the internal bytes ([Uint8List]) of `this` instance.
   Uint8List toBytes([int offset = 0, int? length]) =>
-      _fromUint8List(_bytes, offset, length, _length, true);
+      bytesIO.toBytes(offset, length);
 
   /// Calls the function [output] with the internal bytes of this instance.
   R bytesTo<R>(R Function(Uint8List bytes, int offset, int length) output,
-      [int offset = 0, int? length]) {
-    length ??= _length - offset;
-
-    return output(_bytes, offset, length);
-  }
+          [int offset = 0, int? length]) =>
+      bytesIO.bytesTo(output, offset, length);
 
   /// Returns the index of [byte] inf [offset] and [length] range.
-  int indexOf(int byte, [int offset = 0, int? length]) {
-    if (offset >= _length) return -1;
-
-    length ??= _length - offset;
-
-    var end = offset + length;
-    if (end > _length) {
-      end = _length;
-    }
-
-    if (end == _bytes.length) {
-      return _bytes.indexOf(byte, offset);
-    }
-
-    for (var i = offset; i < end; ++i) {
-      var b = _bytes[i];
-      if (b == byte) return i;
-    }
-
-    return -1;
-  }
+  int indexOf(int byte, [int offset = 0, int? length]) =>
+      bytesIO.indexOf(byte, offset, length);
 
   @override
   String toString() {
-    return 'BytesBuffer{position: $_position, length: $_length, capacity: $capacity}';
+    return 'BytesBuffer@$bytesIO';
   }
-}
-
-class BytesBufferError extends Error {
-  final String message;
-
-  BytesBufferError(this.message);
-
-  @override
-  String toString() => "BytesBuffer error: $message";
-}
-
-class BytesBufferEOF extends BytesBufferError {
-  BytesBufferEOF() : super('End of buffer');
 }

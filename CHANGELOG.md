@@ -1,3 +1,16 @@
+## 1.0.8
+
+- New `BytesIO`:
+  - Implementations: `BytesFileIO` and `BytesUint8ListIO`.
+- Added constructor `BytesBuffer.fromIO`.
+
+- sdk: '>=2.18.4 <4.0.0'
+- collection: ^1.18.0
+- lints: ^2.0.1
+- test: ^1.24.3
+- dependency_validator: ^3.2.2
+- coverage: ^1.6.3
+
 ## 1.0.7
 
 - `ListIntDataExtension`:

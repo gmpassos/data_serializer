@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'extension.dart';
+import 'int_codec.dart';
 import 'platform.dart';
 
 class DataSerializerPlatformGeneric extends DataSerializerPlatform {
@@ -45,26 +46,41 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
       setInt64(data, n, offset, endian);
 
   @override
+  void setDataTypeHandlerUint64(IntCodec data, int n,
+          [int offset = 0, Endian endian = Endian.big]) =>
+      setDataTypeHandlerInt64(data, n, offset, endian);
+
+  @override
   void setInt64(ByteData data, int n,
-      [int offset = 0, Endian endian = Endian.big]) {
+          [int offset = 0, Endian endian = Endian.big]) =>
+      _writeInt64(n, offset, endian, data.setUint32);
+
+  @override
+  void setDataTypeHandlerInt64(IntCodec data, int n,
+          [int offset = 0, Endian endian = Endian.big]) =>
+      _writeInt64(n, offset, endian, data.setUint32);
+
+  void _writeInt64(int n, int offset, Endian endian,
+      void Function(int byteOffset, int value, Endian endian) setUint32) {
     if (n.isNegative) {
       if (n >= -0x80000000) {
-        data.setUint32(offset, 0xFFFFFFFF, endian);
-        data.setUint32(offset + 4, n, endian);
+        setUint32(offset, 0xFFFFFFFF, endian);
+        setUint32(offset + 4, n, endian);
       } else {
-        _writeUint64Impl(data, n, offset, endian);
+        _writeUint64Impl(n, offset, endian, setUint32);
       }
     } else {
       if (n <= 0xFFFFFFFF) {
-        data.setUint32(offset, 0, endian);
-        data.setUint32(offset + 4, n, endian);
+        setUint32(offset, 0, endian);
+        setUint32(offset + 4, n, endian);
       } else {
-        _writeUint64Impl(data, n, offset, endian);
+        _writeUint64Impl(n, offset, endian, setUint32);
       }
     }
   }
 
-  void _writeUint64Impl(ByteData data, int n, int offset, Endian endian) {
+  void _writeUint64Impl(int n, int offset, Endian endian,
+      void Function(int byteOffset, int value, Endian endian) setUint32) {
     checkSafeInteger(n);
 
     // Right shift operator (>>) will cast to 32 bits in JS:
@@ -86,11 +102,11 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
     var n2 = n & 0xFFFFFFFF;
 
     if (endian == Endian.big) {
-      data.setUint32(offset, n1, Endian.big);
-      data.setUint32(offset + 4, n2, Endian.big);
+      setUint32(offset, n1, Endian.big);
+      setUint32(offset + 4, n2, Endian.big);
     } else {
-      data.setUint32(offset, n2, Endian.little);
-      data.setUint32(offset + 4, n1, Endian.little);
+      setUint32(offset, n2, Endian.little);
+      setUint32(offset + 4, n1, Endian.little);
     }
   }
 
@@ -99,7 +115,24 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
       getInt64(data, offset, endian);
 
   @override
-  int getInt64(ByteData data, [int offset = 0, Endian endian = Endian.big]) {
+  int getDataTypeHandlerUint64(IntCodec data,
+          [int offset = 0, Endian endian = Endian.big]) =>
+      data.getInt16(offset, endian);
+
+  @override
+  int getInt64(ByteData data, [int offset = 0, Endian endian = Endian.big]) =>
+      _readInt64(offset, endian, data.getUint32, data.getInt32);
+
+  @override
+  int getDataTypeHandlerInt64(IntCodec data,
+          [int offset = 0, Endian endian = Endian.big]) =>
+      _readInt64(offset, endian, data.getUint32, data.getInt32);
+
+  int _readInt64(
+      int offset,
+      Endian endian,
+      int Function(int offset, Endian endian) getUint32,
+      int Function(int offset, Endian endian) getInt32) {
     int offsetN1, offsetN2;
 
     if (endian == Endian.big) {
@@ -110,12 +143,12 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
       offsetN2 = offset;
     }
 
-    var n1 = data.getUint32(offsetN1, endian);
+    var n1 = getUint32(offsetN1, endian);
 
     if (n1 == 0) {
-      return data.getUint32(offsetN2, endian);
+      return getUint32(offsetN2, endian);
     } else if (n1 == 0xFFFFFFFF) {
-      var n2 = data.getInt32(offsetN2, endian);
+      var n2 = getInt32(offsetN2, endian);
       var n = (-0x800000000 - 1) + ((0x800000001) + n2);
 
       if (!n.isNegative) {
@@ -125,11 +158,11 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
 
       return n;
     } else if (n1 >= 0x80000000) {
-      var n2 = data.getUint32(offsetN2, endian);
+      var n2 = getUint32(offsetN2, endian);
       var n = (n1 * 0x100000000) + n2;
       return n;
     } else {
-      var n2 = data.getUint32(offsetN2, endian);
+      var n2 = getUint32(offsetN2, endian);
       var n = (n1 * 0x100000000) + n2;
       return n;
     }
