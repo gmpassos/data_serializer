@@ -3,6 +3,11 @@
 - New `BytesIO`:
   - Implementations: `BytesFileIO` and `BytesUint8ListIO`.
 - Added constructor `BytesBuffer.fromIO`.
+- `DataSerializerPlatformGeneric`:
+  - Fixed `_writeInt64` and `_readInt64` for JS/Browser platform.
+
+- Dart CI:
+  - Tests platforms: vm, exe, chrome. 
 
 - sdk: '>=2.18.4 <4.0.0'
 - collection: ^1.18.0

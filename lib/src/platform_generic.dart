@@ -64,15 +64,25 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
       void Function(int byteOffset, int value, Endian endian) setUint32) {
     if (n.isNegative) {
       if (n >= -0x80000000) {
-        setUint32(offset, 0xFFFFFFFF, endian);
-        setUint32(offset + 4, n, endian);
+        if (endian.isBigEndian) {
+          setUint32(offset, 0xFFFFFFFF, endian);
+          setUint32(offset + 4, n, endian);
+        } else {
+          setUint32(offset, n, endian);
+          setUint32(offset + 4, 0xFFFFFFFF, endian);
+        }
       } else {
         _writeUint64Impl(n, offset, endian, setUint32);
       }
     } else {
       if (n <= 0xFFFFFFFF) {
-        setUint32(offset, 0, endian);
-        setUint32(offset + 4, n, endian);
+        if (endian.isBigEndian) {
+          setUint32(offset, 0, endian);
+          setUint32(offset + 4, n, endian);
+        } else {
+          setUint32(offset, n, endian);
+          setUint32(offset + 4, 0, endian);
+        }
       } else {
         _writeUint64Impl(n, offset, endian, setUint32);
       }
@@ -117,7 +127,7 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
   @override
   int getDataTypeHandlerUint64(IntCodec data,
           [int offset = 0, Endian endian = Endian.big]) =>
-      data.getInt16(offset, endian);
+      getDataTypeHandlerInt64(data, offset, endian);
 
   @override
   int getInt64(ByteData data, [int offset = 0, Endian endian = Endian.big]) =>
@@ -159,11 +169,15 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
       return n;
     } else if (n1 >= 0x80000000) {
       var n2 = getUint32(offsetN2, endian);
-      var n = (n1 * 0x100000000) + n2;
+      // var n0 = (n1 * 0x100000000);
+      // JS safe:
+      var n0 = -((0xFFFFFFFF - n1) + 1) * 0x100000000;
+      var n = n0 + n2;
       return n;
     } else {
       var n2 = getUint32(offsetN2, endian);
-      var n = (n1 * 0x100000000) + n2;
+      var n0 = (n1 * 0x100000000);
+      var n = n0 + n2;
       return n;
     }
   }

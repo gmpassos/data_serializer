@@ -25,8 +25,12 @@ jobs:
         run: dart analyze --fatal-infos --fatal-warnings .
       - name: dependency_validator
         run: dart run dependency_validator
-      - name: Run tests
-        run: dart test
+      - name: Run tests (VM)
+        run: dart test --platform vm
+      - name: Run tests (exe)
+        run: dart test --compiler exe
+      - name: Run tests (Chrome)
+        run: dart test --platform chrome
       - name: dart doc
         run:  dart doc --dry-run
       - name: Generate coverage report

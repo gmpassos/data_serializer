@@ -1,10 +1,27 @@
 @Tags(['num', 'platform'])
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:data_serializer/data_serializer.dart';
 import 'package:test/test.dart';
 
-const testSafeNumbers = {
+const testSafeNumbers = <int, String>{
+  4295161520: '00000001 0002F6B0',
+  -4295161520: 'FFFFFFFE FFFD0950',
+  -1048575: 'FFFFFFFF FFF00001',
+  -16777215: 'FFFFFFFF FF000001',
+  -268435455: 'FFFFFFFF F0000001',
+  -4294967295: 'FFFFFFFF 00000001',
+  -4294967296: 'FFFFFFFF00000000',
+  -68719476735: 'FFFFFFF0 00000001',
+  -68451041279: 'FFFFFFF0 10000001',
+  -1099243192319: 'FFFFFF00 10000001',
+  -281474708275199: 'FFFF0000 10000001',
+  -281470413307903: 'FFFF0001 10000001',
+  -4503599358935039: 'FFF00000 10000001',
+  4222124650659841: '000F0000 00000001',
+  4503595332403201: '000FFFFF 00000001',
+  4222128945627137: '000F0001 00000001',
   1: '00000000 00000001',
   -1: 'FFFFFFFF FFFFFFFF',
   2: '00000000 00000002',
@@ -13,13 +30,13 @@ const testSafeNumbers = {
   -123: 'FFFFFFFF FFFFFF85',
   70123: '00000000 000111EB',
   268435455: '00000000 0FFFFFFF',
-  -268435455: 'FFFFFFFF F0000001',
+  //-268435455: 'FFFFFFFF F0000001',
   267324344: '00000000 0FEF0BB8',
   -267324344: 'FFFFFFFF F010F448',
   4294967296: '00000001 00000000',
-  -4294967296: 'FFFFFFFF 00000000',
+  //-4294967296: 'FFFFFFFF 00000000',
   4294967295: '00000000 FFFFFFFF',
-  -4294967295: 'FFFFFFFF 00000001',
+  //-4294967295: 'FFFFFFFF 00000001',
   4294967294: '00000000 FFFFFFFE',
   -4294967294: 'FFFFFFFF 00000002',
   4294967293: '00000000 FFFFFFFD',
@@ -29,7 +46,7 @@ const testSafeNumbers = {
   4294665294: '00000000 FFFB644E',
   -4294665294: 'FFFFFFFF 00049BB2',
   68719476735: '0000000F FFFFFFFF',
-  -68719476735: 'FFFFFFF0 00000001',
+  //-68719476735: 'FFFFFFF0 00000001',
   1099511627775: '000000FF FFFFFFFF',
   -1099511627775: 'FFFFFF00 00000001',
   17592186044415: '00000FFF FFFFFFFF',
@@ -45,7 +62,7 @@ const testSafeNumbers = {
 final p = DataSerializerPlatform();
 
 void _testNumber(int n, String result) {
-  print('---> $n > ${(n >> 32).toHex32()} + ${n.toHex32()}');
+  print('---> $n > ${(n ~/ 0xFFFFFFFF).toHex32()} + ${n.toHex32()}');
 
   var r64 = result.replaceAll(RegExp(r'\s'), '').decodeHex();
   expect(r64.length, equals(8));
@@ -64,8 +81,7 @@ void _testNumber(int n, String result) {
   int nRead1 = p.readUint64(bs1);
   int nRead2 = p.readInt64(bs2);
 
-  expect(nRead1, equals(n),
-      reason: 'n: $n > ${n.toHex64()} != $nRead1 > ${nRead1.toHex64()}');
+  expect(nRead1, equals(n));
   expect(nRead2, equals(n));
 
   expect(p.isSafeInteger(n), isTrue,
@@ -79,6 +95,9 @@ void main() {
     setUp(() {});
 
     test('53 bits Limits', () {
+      expect(p.maxSafeIntAsBigInt, equals(BigInt.from(p.maxSafeInt)));
+      expect(p.minSafeIntAsBigInt, equals(BigInt.from(p.minSafeInt)));
+
       expect(p.isSafeInteger(9007199254740991), isTrue);
       expect(p.isSafeInteger(-9007199254740991), isTrue);
 
@@ -96,14 +115,40 @@ void main() {
 
       expect(BigInt.from(9007199254740991).isSafeInteger, isTrue);
       BigInt.from(9007199254740991).checkSafeInteger();
+
+      expect(BigInt.parse('9007199254740991').isSafeInteger, isTrue);
+      expect(BigInt.parse('-9007199254740991').isSafeInteger, isTrue);
+
+      expect(BigInt.parse('9999999007199254740991').isSafeInteger, isFalse);
+      expect(BigInt.parse('-9999999007199254740991').isSafeInteger, isFalse);
+
+      expect(
+          () => p.checkSafeInteger(9007199254740991), isNot(throwsStateError));
+      expect(
+          () => p.checkSafeInteger(-9007199254740991), isNot(throwsStateError));
+
+      expect(() => p.checkSafeIntegerByBigInt(BigInt.from(9007199254740991)),
+          isNot(throwsStateError));
+      expect(() => p.checkSafeIntegerByBigInt(BigInt.from(-9007199254740991)),
+          isNot(throwsStateError));
+
+      expect(
+          () => p
+              .checkSafeIntegerByBigInt(BigInt.parse('9999999007199254740991')),
+          throwsStateError);
+      expect(
+          () => p.checkSafeIntegerByBigInt(
+              BigInt.parse('-9999999007199254740991')),
+          throwsStateError);
     });
 
     test('64 bits Limits', () {
       var max64 = BigInt.parse('9223372036854775807');
       var min64 = BigInt.parse('-9223372036854775808');
+      var rangMargin = BigInt.from(1024);
 
-      var outUpper64 = max64 + BigInt.from(1024);
-      var outLower64 = min64 - BigInt.from(1024);
+      var outUpper64 = max64 + rangMargin;
+      var outLower64 = min64 - rangMargin;
 
       if (p.supportsFullInt64) {
         expect(p.isSafeIntegerByBigInt(max64), isTrue);
@@ -132,21 +177,28 @@ void main() {
         print('** Testing testSafeNumbers: ${testSafeNumbers.length}');
 
         for (var e in testSafeNumbers.entries) {
-          _testNumber(e.key, e.value);
+          var n = e.key;
+          var result = e.value;
+          _testNumber(n, result);
         }
       },
       //skip: true,
+      tags: 'safe_numbers',
     );
 
     test(
-      'test sequence',
+      'test sequence 1',
       () {
-        for (var endian in [Endian.big, Endian.little]) {
+        for (var endian in [Endian.little, Endian.big]) {
           print(
               '** Testing numbers sequence (${endian == Endian.big ? 'BE' : 'LE'})...');
 
+          var rand = Random(74818365);
+
           var total = 0;
-          for (var n = 0xAA; n < 0xFFFFFFFFFF; n += (255 * 255 * 3)) {
+          for (var n = 0xAA;
+              n < 0xFFFFFFFFFFFF;
+              n += rand.nextInt(255 * 255 * 256 * 3 * 3)) {
             var bs1 = Uint8List(8);
             var bs2 = Uint8List(8);
 
@@ -154,10 +206,11 @@ void main() {
             p.writeInt64(bs2, n, 0, endian);
 
             var nRead1 = p.readUint64(bs1, 0, endian);
-            var nRead2 = p.readUint64(bs1, 0, endian);
+            var nRead2 = p.readUint64(bs2, 0, endian);
 
-            expect(nRead1, equals(n));
-            expect(nRead2, equals(n));
+            var endianName = endian.isBigEndian ? 'big' : 'little';
+            expect(nRead1, equals(n), reason: "endian: $endianName");
+            expect(nRead2, equals(n), reason: "endian: $endianName");
             total++;
           }
 
@@ -168,14 +221,18 @@ void main() {
     );
 
     test(
-      'test sequence',
+      'test sequence 2',
       () {
-        for (var endian in [Endian.big, Endian.little]) {
+        for (var endian in [Endian.little, Endian.big]) {
           print(
               '** Testing numbers sequence (${endian == Endian.big ? 'BE' : 'LE'})...');
 
+          var rand = Random(3847592812);
+
           var total = 0;
-          for (var n = 0xAA; n < 0xFFFFFFFFFF; n += (255 * 255 * 3)) {
+          for (var n = 0xAA;
+              n < 0xFFFFFFFFFFFF;
+              n += rand.nextInt(255 * 255 * 256 * 3 * 4)) {
             var bs1a = Uint8List(8);
             var bs2a = Uint8List(8);
             var bsh1a = ByteDataIntCodec(bs1a.asByteData());

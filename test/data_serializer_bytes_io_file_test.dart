@@ -1,4 +1,5 @@
-@Tags(['bytes'])
+@TestOn('vm')
+@Tags(['bytes', 'file'])
 import 'dart:io';
 
 import 'package:data_serializer/src/bytes_io_file.dart';

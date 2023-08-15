@@ -1,13 +1,22 @@
 
 tags:
-  # Test number tests.
+  # Number tests.
   num:
     timeout: 30s
-  # Test bytes tests.
+  # Bytes tests.
   bytes:
     timeout: 30s
-  # Test number tests.
+  # IO memory tests.
+  mem:
+    timeout: 30s
+  # IO file tests.
+  file:
+    timeout: 30s
+  # Platform number tests.
   platform:
+    timeout: 30s
+  # Platform safe numbers tests.
+  safe_numbers:
     timeout: 30s
 
 timeout: 3x
@@ -29,5 +38,4 @@ define_platforms:
     settings:
       executable:
         linux: firefox-esr
-
 
