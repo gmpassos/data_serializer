@@ -1,3 +1,7 @@
+## 1.0.10
+
+- `data_serializer_io.dart`: `data_serializer.io`
+
 ## 1.0.9
 
 - `BytesIO`:

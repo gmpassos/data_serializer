@@ -1,6 +1,6 @@
 name: data_serializer
 description: Portable Dart package to handle data serialization/deserialization efficiently, including a dynamic BytesBuffer to read/write data.
-version: 1.0.9
+version: 1.0.10
 homepage: https://github.com/gmpassos/data_serializer
 
 environment:
