@@ -1,4 +1,4 @@
-@Tags(['bytes'])
+@Tags(['bytes', 'mem'])
 import 'package:data_serializer/data_serializer.dart';
 import 'package:test/test.dart';
 

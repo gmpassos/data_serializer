@@ -271,6 +271,9 @@ void doBytesBufferTests(
   });
 
   test('writeUint64/readUint64/readUint32 +', () {
+    final b0 = DataSerializerPlatform.instance.supportsFullInt64 ? 127 : 0;
+    final b1 = DataSerializerPlatform.instance.supportsFullInt64 ? 255 : 31;
+
     var buffer = createBsBuff();
 
     var maxSafeInt = DataSerializerPlatform.instance.maxSafeInt;
@@ -292,10 +295,10 @@ void doBytesBufferTests(
     expect(buffer.readUint32(), equals(maxSafeInt ~/ 0xFFFFFFFF - 1));
     expect(buffer.readUint32(), equals(maxSafeInt & 0xFFFFFFFF));
 
-    expect(buffer.toBytes(), equals([127, 255, 255, 255, 255, 255, 255, 255]));
-    expect(buffer.toBytes(1), equals([255, 255, 255, 255, 255, 255, 255]));
-    expect(buffer.toBytes(0, 2), equals([127, 255]));
-    expect(buffer.toBytes(1, 2), equals([255, 255]));
+    expect(buffer.toBytes(), equals([b0, b1, 255, 255, 255, 255, 255, 255]));
+    expect(buffer.toBytes(1), equals([b1, 255, 255, 255, 255, 255, 255]));
+    expect(buffer.toBytes(0, 2), equals([b0, b1]));
+    expect(buffer.toBytes(1, 2), equals([b1, 255]));
 
     buffer.bytesTo((bytes, offset, length) {
       expect(
