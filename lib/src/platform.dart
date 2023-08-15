@@ -28,10 +28,10 @@ abstract class DataSerializerPlatform {
   int get minSafeInt;
 
   /// The maximum safe `int` int the current platform as [BigInt].
-  BigInt get maxSafeIntAsBigInt => BigInt.from(maxSafeInt);
+  BigInt get maxSafeIntAsBigInt => _maxSafeBigInt;
 
   /// The minimum safe `int` int the current platform as [BigInt].
-  BigInt get minSafeIntAsBigInt => BigInt.from(minSafeInt);
+  BigInt get minSafeIntAsBigInt => _minSafeBigInt;
 
   /// The maximum safe `int` int the current platform as [Uint8List].
   Uint8List get maxSafeIntBytes;

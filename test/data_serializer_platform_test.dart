@@ -95,6 +95,9 @@ void main() {
     setUp(() {});
 
     test('53 bits Limits', () {
+      expect(p.maxSafeIntAsBigInt, equals(BigInt.from(p.maxSafeInt)));
+      expect(p.minSafeIntAsBigInt, equals(BigInt.from(p.minSafeInt)));
+
       expect(p.isSafeInteger(9007199254740991), isTrue);
       expect(p.isSafeInteger(-9007199254740991), isTrue);
 
@@ -112,6 +115,31 @@ void main() {
 
       expect(BigInt.from(9007199254740991).isSafeInteger, isTrue);
       BigInt.from(9007199254740991).checkSafeInteger();
+
+      expect(BigInt.parse('9007199254740991').isSafeInteger, isTrue);
+      expect(BigInt.parse('-9007199254740991').isSafeInteger, isTrue);
+
+      expect(BigInt.parse('9999999007199254740991').isSafeInteger, isFalse);
+      expect(BigInt.parse('-9999999007199254740991').isSafeInteger, isFalse);
+
+      expect(
+          () => p.checkSafeInteger(9007199254740991), isNot(throwsStateError));
+      expect(
+          () => p.checkSafeInteger(-9007199254740991), isNot(throwsStateError));
+
+      expect(() => p.checkSafeIntegerByBigInt(BigInt.from(9007199254740991)),
+          isNot(throwsStateError));
+      expect(() => p.checkSafeIntegerByBigInt(BigInt.from(-9007199254740991)),
+          isNot(throwsStateError));
+
+      expect(
+          () => p
+              .checkSafeIntegerByBigInt(BigInt.parse('9999999007199254740991')),
+          throwsStateError);
+      expect(
+          () => p.checkSafeIntegerByBigInt(
+              BigInt.parse('-9999999007199254740991')),
+          throwsStateError);
     });
 
     test('64 bits Limits', () {
