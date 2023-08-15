@@ -50,6 +50,16 @@ class BytesBuffer {
   /// Changes the read/write cursor [position].
   int seek(int position) => bytesIO.seek(position);
 
+  /// Flushes [bytesIO] data.
+  void flush() => bytesIO.flush();
+
+  /// Returns `true` if [bytesIO] is closed.
+  /// - See [close].
+  bool get isClosed => bytesIO.isClosed;
+
+  /// Closes [bytesIO].
+  void close() => bytesIO.close();
+
   /// Writes 1 byte. Increments [position] by 1.
   int writeByte(int b) => bytesIO.writeByte(b);
 

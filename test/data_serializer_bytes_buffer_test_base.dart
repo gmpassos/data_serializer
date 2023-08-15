@@ -81,6 +81,9 @@ void doBytesBufferTests(
     expect(buffer2.position, equals(0));
     expect(buffer2.capacity, equals(4));
 
+    buffer.flush();
+    buffer2.flush();
+
     expect(buffer2.writeInt64(0x08070605040302), equals(8));
     expect(buffer2.asUint8List(), equals([0, 8, 7, 6, 5, 4, 3, 2]));
     expect(buffer2.length, equals(8));
@@ -109,6 +112,17 @@ void doBytesBufferTests(
     expect(time2, equals(time));
     expect(time2.millisecondsSinceEpoch, equals(timeMs));
     expect(buffer2.position, equals(16));
+
+    expect(buffer.bytesIO.isClosed, isFalse);
+    expect(buffer2.bytesIO.isClosed, isFalse);
+
+    buffer.close();
+    buffer2.close();
+
+    expect(buffer.isClosed, buffer.bytesIO.supportsClosing ? isTrue : isFalse);
+
+    expect(
+        buffer2.isClosed, buffer2.bytesIO.supportsClosing ? isTrue : isFalse);
   }
 
   test('basic 0', () => testBytesBasic(0));
