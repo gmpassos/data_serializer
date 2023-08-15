@@ -10,6 +10,9 @@ import 'int_codec.dart';
 class BytesFileIO extends BytesIO {
   final RandomAccessFile _io;
 
+  /// The [RandomAccessFile] of this IO.
+  RandomAccessFile get randomAccessFile => _io;
+
   @override
   late final FileDataIntCodec bytesData;
 
@@ -165,6 +168,37 @@ class BytesFileIO extends BytesIO {
       return true;
     }
     return false;
+  }
+
+  /// Flushes this instance data.
+  /// - Flushes [randomAccessFile].
+  @override
+  void flush() {
+    try {
+      _io.flushSync();
+    } catch (_) {}
+  }
+
+  /// Returns `true` on [BytesFileIO] implementation.
+  @override
+  bool get supportsClosing => true;
+
+  bool _closed = false;
+
+  @override
+  bool get isClosed => _closed;
+
+  /// Flushes then closes this instance.
+  /// - Closes [randomAccessFile].
+  /// - See [isClosed].
+  @override
+  close() {
+    flush();
+
+    try {
+      _closed = true;
+      _io.closeSync();
+    } catch (_) {}
   }
 
   @override

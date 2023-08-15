@@ -1,3 +1,10 @@
+## 1.0.9
+
+- `BytesIO`:
+  - Added `flush`, `close`, `isClosed` and `supportsClosing`.
+- `BytesBuffer`:
+  - Added `flush` and `close`.
+
 ## 1.0.8
 
 - New `BytesIO`:

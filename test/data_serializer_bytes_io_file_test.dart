@@ -50,6 +50,7 @@ void main() {
 BytesFileIO _newBytesFileIO(Directory tempDir, int capacity) {
   var tempFile = createTempFile(tempDir, capacity);
   var io = BytesFileIO.fromFile(tempFile, length: 0);
+  expect(io.capacity, equals(io.randomAccessFile.lengthSync()));
   return io;
 }
 
@@ -57,5 +58,6 @@ Future<BytesFileIO> _newBytesFileIOAsync(
     Directory tempDir, int capacity) async {
   var tempFile = createTempFile(tempDir, capacity);
   var io = await BytesFileIO.fromFileAsync(tempFile, length: 0);
+  expect(io.capacity, equals(io.randomAccessFile.lengthSync()));
   return io;
 }

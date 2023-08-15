@@ -54,6 +54,19 @@ abstract class BytesIO {
   /// Compact the internal bytes [capacity] to [length].
   bool compact();
 
+  /// Flushes data.
+  void flush();
+
+  /// Returns `true` if this implementation supports the [close] operation.
+  bool get supportsClosing;
+
+  /// Returns `true` if this IO was closed.
+  /// - See [close].
+  bool get isClosed;
+
+  /// Closes IO.
+  close();
+
   /// Writes 1 byte. Increments [position] by 1.
   int writeByte(int b);
 

@@ -106,6 +106,22 @@ class BytesUint8ListIO extends BytesIO {
     return false;
   }
 
+  /// Has no effect on [BytesUint8ListIO] implementation.
+  @override
+  void flush() {}
+
+  /// Returns `false` on [BytesUint8ListIO] implementation.
+  @override
+  bool get supportsClosing => false;
+
+  /// Always return `false` on [BytesUint8ListIO] implementation.
+  @override
+  bool get isClosed => false;
+
+  /// Has no effect on [BytesUint8ListIO] implementation.
+  @override
+  close() {}
+
   @override
   int writeByte(int b) {
     final pos = _position;
