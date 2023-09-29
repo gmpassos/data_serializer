@@ -1,5 +1,6 @@
 import 'package:data_serializer/data_serializer.dart';
 import 'package:test/test.dart';
+import 'dart:typed_data';
 
 const integerRange = 1000000;
 
@@ -19,14 +20,53 @@ void main() {
 
       bs.writeByte(101);
 
+      bs.add(Uint8List.fromList([200, 210, 220, 230]));
+      bs.add(BytesEmitter(data: [100, 110, 120, 130]));
+      bs.add(50);
+      bs.add(60);
+      bs.add(70);
+
       var s = bs.toString();
       print(s);
 
       var sh = bs.toString(hex: true);
       print(sh);
 
-      expect(bs.output(),
-          equals([0, 1, 2, 3, 1, 1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 10, 11, 101]));
+      print(bs.output());
+
+      expect(
+          bs.output(),
+          equals([
+            0,
+            1,
+            2,
+            3,
+            1,
+            1,
+            1,
+            1,
+            2,
+            2,
+            3,
+            3,
+            3,
+            4,
+            4,
+            10,
+            11,
+            101,
+            200,
+            210,
+            220,
+            230,
+            100,
+            110,
+            120,
+            130,
+            50,
+            60,
+            70
+          ]));
 
       expect(
           s,
@@ -36,7 +76,9 @@ void main() {
               '  [2 2]\n'
               '[3 3 3]\n'
               '[4 4 10 11]\n'
-              '[101]\n'
+              '[101 200 210 220 230]\n'
+              '  [100 110 120 130]\n'
+              '[50 60 70]\n'
               ''));
 
       expect(
@@ -47,7 +89,9 @@ void main() {
               '  [02 02]\n'
               '[03 03 03]\n'
               '[04 04 0a 0b]\n'
-              '[65]\n'
+              '[65 c8 d2 dc e6]\n'
+              '  [64 6e 78 82]\n'
+              '[32 3c 46]\n'
               ''));
     });
     test('basic +description', () {
