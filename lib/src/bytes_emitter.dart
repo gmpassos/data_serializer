@@ -190,7 +190,8 @@ class BytesEmitter {
     return all;
   }
 
-  static final _lineTail = RegExp(r'(?:[ \t]*\n)+');
+  static final _regexpLineTail = RegExp(r'(?:[ \t]*\n)+');
+  static final _regexpNs = RegExp(r'(^|\n[ \t]*)((?:\[[\da-f, ]+][ \t]*)+)');
 
   /// Show bytes [description] if defined.
   @override
@@ -212,17 +213,25 @@ class BytesEmitter {
           var h = e.toHex();
           s.write('[$h] ');
         } else {
-          s.write('$e ');
+          s.write('[$e] ');
         }
       } else {
-        var n = hex ? e : e;
-        s.write('$n ');
+        throw StateError("Can't handle type: $e");
       }
     }
 
     var lines = s.toString().split('\n').map((l) => '$indent$l');
 
-    var allLines = lines.join('\n').replaceAll(_lineTail, '\n').trimRight();
+    var allLines = lines
+        .join('\n')
+        .replaceAllMapped(_regexpNs, (m) {
+          var indent = m.group(1)!;
+          var ns = m.group(2)!;
+          ns = ns.replaceAll(RegExp(r'[^\da-f]+'), ' ').trim();
+          return '$indent[$ns]';
+        })
+        .replaceAll(_regexpLineTail, '\n')
+        .trimRight();
 
     final description = this.description;
     if (description != null && description.isNotEmpty) {

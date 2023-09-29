@@ -38,7 +38,7 @@ class Leb128 {
         break;
       }
 
-      i += 1;
+      ++i;
     }
 
     if ((shift < n) && (bytes[i] & 0x40) != 0) {
@@ -63,7 +63,7 @@ class Leb128 {
       n >>= 7;
       parts.add(part);
 
-      i += 1;
+      ++i;
     }
 
     for (var i = 0; i < parts.length - 1; i++) {
@@ -163,10 +163,11 @@ extension BytesBufferLeb128Extension on BytesBuffer {
 
   /// Reads a LEB128 signed integer.
   /// - [bits] (optional) argument specifies the number of bits in the integer. Default: 64
-  int readLeb128SignedInt(Uint8List bytes, {int bits = 64}) {
+  int readLeb128SignedInt({int bits = 64}) {
     var result = 0;
     var shift = 0;
-    var i = 0;
+
+    var lastByte = 0;
 
     while (true) {
       var byte = readByte();
@@ -177,10 +178,10 @@ extension BytesBufferLeb128Extension on BytesBuffer {
         break;
       }
 
-      i += 1;
+      lastByte = byte;
     }
 
-    if ((shift < bits) && (bytes[i] & 0x40) != 0) {
+    if ((shift < bits) && (lastByte & 0x40) != 0) {
       result |= (~0 << shift);
     }
 
