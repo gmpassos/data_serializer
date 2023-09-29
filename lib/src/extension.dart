@@ -389,6 +389,12 @@ extension ListIntDataExtension on List<int> {
   }
 }
 
+/// Extension for `Iterable<List<T>>`.
+extension IterableListIntsExtension<T> on Iterable<Iterable<T>> {
+  /// Returns the expanded length (the sum of the lengths of all elements).
+  int get expandedLength => map((e) => e.length).sum;
+}
+
 extension ListGenericExtension<T> on List<T> {
   /// Returns a copy of this instance as a reversed [List] of `T`.
   List<T> reversedList() => reversed.toList();
