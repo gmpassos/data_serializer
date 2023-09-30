@@ -199,6 +199,30 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
   @override
   int readInt64(Uint8List out, [int offset = 0, Endian endian = Endian.big]) =>
       getInt64(out.asByteData(), offset, endian);
+
+  @override
+  int shiftRightInt(int n, int shift) {
+    if (n >= 0) {
+      return n >> shift;
+    }
+
+    var i = BigInt.from(n);
+    i = i >> shift;
+
+    return i.toInt();
+  }
+
+  @override
+  int shiftLeftInt(int n, int shift) {
+    if (n >= 0) {
+      return n << shift;
+    }
+
+    var i = BigInt.from(n);
+    i = i << shift;
+
+    return i.toInt();
+  }
 }
 
 DataSerializerPlatform createPlatformInstance() =>

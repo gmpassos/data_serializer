@@ -2,6 +2,9 @@ import 'dart:convert' as dart_convert;
 import 'dart:typed_data';
 
 import 'bytes_buffer.dart';
+import 'platform.dart';
+
+final DataSerializerPlatform _platform = DataSerializerPlatform.instance;
 
 /// LEB128 integer compression.
 class Leb128 {
@@ -14,7 +17,7 @@ class Leb128 {
 
     while (true) {
       var byte = bytes[i++] & 0xFF;
-      result |= (byte & 0x7F) << shift;
+      result |= _platform.shiftLeftInt((byte & 0x7F), shift);
       if ((byte & 0x80) == 0) break;
       shift += 7;
     }
@@ -31,7 +34,7 @@ class Leb128 {
 
     while (true) {
       var byte = bytes[i];
-      result |= ((byte & 0x7F) << shift);
+      result |= _platform.shiftLeftInt((byte & 0x7F), shift);
       shift += 7;
 
       if ((byte & 0x80) == 0) {
@@ -42,7 +45,7 @@ class Leb128 {
     }
 
     if ((shift < n) && (bytes[i] & 0x40) != 0) {
-      result |= (~0 << shift);
+      result |= _platform.shiftLeftInt(~0, shift);
     }
 
     return result;
@@ -60,7 +63,7 @@ class Leb128 {
 
     while (i < size) {
       var part = n & 0x7F;
-      n >>= 7;
+      n = _platform.shiftRightInt(n, 7);
       parts.add(part);
 
       ++i;
@@ -80,7 +83,7 @@ class Leb128 {
 
     while (more) {
       var byte = n & 0x7F;
-      n >>= 7;
+      n = _platform.shiftRightInt(n, 7);
 
       if (n == 0 && (byte & 0x40) == 0) {
         more = false;
@@ -153,7 +156,7 @@ extension BytesBufferLeb128Extension on BytesBuffer {
 
     while (true) {
       var byte = readByte();
-      result |= (byte & 0x7F) << shift;
+      result |= _platform.shiftLeftInt((byte & 0x7F), shift);
       if ((byte & 0x80) == 0) break;
       shift += 7;
     }
@@ -171,7 +174,7 @@ extension BytesBufferLeb128Extension on BytesBuffer {
 
     while (true) {
       var byte = readByte();
-      result |= ((byte & 0x7F) << shift);
+      result |= _platform.shiftLeftInt((byte & 0x7F), shift);
       shift += 7;
 
       if ((byte & 0x80) == 0) {
@@ -182,7 +185,7 @@ extension BytesBufferLeb128Extension on BytesBuffer {
     }
 
     if ((shift < bits) && (lastByte & 0x40) != 0) {
-      result |= (~0 << shift);
+      result |= _platform.shiftLeftInt(~0, shift);
     }
 
     return result;

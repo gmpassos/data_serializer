@@ -115,4 +115,10 @@ abstract class DataSerializerPlatform {
 
   /// Reads a `Int64` from [out] at [offset] in [endian] order.
   int readInt64(Uint8List out, [int offset = 0, Endian endian = Endian.big]);
+
+  /// Performs a right bit shift (`>>`).
+  int shiftRightInt(int n, int shift);
+
+  /// Performs a left bit shift (`<<`).
+  int shiftLeftInt(int n, int shift);
 }

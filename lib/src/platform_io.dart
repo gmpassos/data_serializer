@@ -133,6 +133,16 @@ class DataSerializerPlatformIO extends DataSerializerPlatform {
     data.setUint32(offset, n0, endian);
     data.setUint32(offset + 4, n1, endian);
   }
+
+  @override
+  int shiftRightInt(int n, int shift) {
+    return n >> shift;
+  }
+
+  @override
+  int shiftLeftInt(int n, int shift) {
+    return n << shift;
+  }
 }
 
 DataSerializerPlatform createPlatformInstance() => DataSerializerPlatformIO();
