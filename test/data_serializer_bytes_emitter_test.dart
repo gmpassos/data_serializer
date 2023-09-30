@@ -151,6 +151,91 @@ void main() {
               ''));
     });
 
+    test('blocks', () {
+      var bs = BytesEmitter(data: [0, 1, 2, 3]);
+
+      bs.writeLeb128Block([
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+      ]);
+
+      bs.writeBytesLeb128Block([
+        BytesEmitter(data: [10, 20, 30, 40, 50])
+      ]);
+
+      bs.writeAllBytes([
+        BytesEmitter(data: [1, 10, 100]),
+        BytesEmitter(data: [2, 20, 200])
+      ]);
+
+      var s = bs.toString();
+      print(s);
+
+      var sh = bs.toString(hex: true);
+      print(sh);
+
+      print(bs.output());
+
+      expect(
+          bs.output(),
+          equals([
+            0,
+            1,
+            2,
+            3,
+            10,
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            5,
+            10,
+            20,
+            30,
+            40,
+            50,
+            1,
+            10,
+            100,
+            2,
+            20,
+            200
+          ]));
+
+      expect(
+          s,
+          equals(''
+              '[0 1 2 3]\n'
+              '  ## Bytes block length:\n'
+              '  [10]\n'
+              '[0 1 2 3 4 5 6 7 8 9]\n'
+              '  ## Bytes block length:\n'
+              '  [5]\n'
+              '  [10 20 30 40 50]\n'
+              '  [1 10 100]\n'
+              '  [2 20 200]\n'
+              ''));
+
+      expect(
+          sh,
+          equals(''
+              '[00 01 02 03]\n'
+              '  ## Bytes block length:\n'
+              '  [0a]\n'
+              '[00 01 02 03 04 05 06 07 08 09]\n'
+              '  ## Bytes block length:\n'
+              '  [05]\n'
+              '  [0a 14 1e 28 32]\n'
+              '  [01 0a 64]\n'
+              '  [02 14 c8]\n'
+              ''));
+    });
+
     test('blocks +description', () {
       var bs = BytesEmitter(data: [0, 1, 2, 3], description: "root magic");
 
