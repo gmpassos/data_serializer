@@ -203,6 +203,10 @@ void main() {
 
       expect(bs.readLeb128UnsignedInt(), equals(1000000));
       expect(bs.readLeb128SignedInt(), equals(-1000000));
+
+      expect(bs.readLeb128Block(), equals([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0]));
+
+      expect(bs.readLeb128String(), equals("Foooooooooooooooooooooooooooooo"));
     });
   });
 }
