@@ -3,7 +3,7 @@
 - Added support to `Leb128`.
 - New `BytesEmitter`.
 - `DataSerializerPlatform`:
-  - Added `shiftRightInt` and `shiftLeftInt`.
+  - Added `supportsFullBitsShift`, `shiftRightInt` and `shiftLeftInt`.
 
 - sdk: '>=3.0.0 <4.0.0'
 - dependency_validator: ^3.2.3

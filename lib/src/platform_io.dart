@@ -33,6 +33,9 @@ class DataSerializerPlatformIO extends DataSerializerPlatform {
   int get safeIntBits => 64;
 
   @override
+  bool get supportsFullBitsShift => true;
+
+  @override
   bool get supportsFullInt64 => true;
 
   @override

@@ -36,6 +36,9 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
   bool get supportsFullInt64 => false;
 
   @override
+  bool get supportsFullBitsShift => false;
+
+  @override
   bool isSafeInteger(int n) {
     return n <= _maxSafeInt && n >= _minSafeInt;
   }

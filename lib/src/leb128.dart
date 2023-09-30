@@ -45,7 +45,11 @@ class Leb128 {
     }
 
     if ((shift < n) && (bytes[i] & 0x40) != 0) {
-      result |= _platform.shiftLeftInt(~0, shift);
+      if (_platform.supportsFullBitsShift) {
+        result |= _platform.shiftLeftInt(-1, shift);
+      } else {
+        result = (BigInt.from(result) | (BigInt.from(-1) << shift)).toInt();
+      }
     }
 
     return result;
@@ -185,7 +189,11 @@ extension BytesBufferLeb128Extension on BytesBuffer {
     }
 
     if ((shift < bits) && (lastByte & 0x40) != 0) {
-      result |= _platform.shiftLeftInt(~0, shift);
+      if (_platform.supportsFullBitsShift) {
+        result |= _platform.shiftLeftInt(-1, shift);
+      } else {
+        result = (BigInt.from(result) | (BigInt.from(-1) << shift)).toInt();
+      }
     }
 
     return result;

@@ -45,6 +45,9 @@ abstract class DataSerializerPlatform {
   /// Returns `true` if the platform fully supports 64 bits integers.
   bool get supportsFullInt64;
 
+  /// Returns `true` if the platform fully supports bits shift.
+  bool get supportsFullBitsShift;
+
   /// Returns `true` if [n] is a safe `int`.
   bool isSafeInteger(int n);
 
