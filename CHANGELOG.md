@@ -1,3 +1,13 @@
+## 1.0.11
+
+- Added support to `Leb128`.
+- New `BytesEmitter`.
+- `DataSerializerPlatform`:
+  - Added `supportsFullBitsShift`, `shiftRightInt` and `shiftLeftInt`.
+
+- sdk: '>=3.0.0 <4.0.0'
+- dependency_validator: ^3.2.3
+
 ## 1.0.10
 
 - `data_serializer_io.dart`: `data_serializer.io`
