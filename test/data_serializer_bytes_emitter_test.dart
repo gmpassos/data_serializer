@@ -151,7 +151,7 @@ void main() {
               ''));
     });
 
-    test('blocks', () {
+    test('blocks +description', () {
       var bs = BytesEmitter(data: [0, 1, 2, 3], description: "root magic");
 
       bs.writeLeb128Block([
@@ -162,11 +162,18 @@ void main() {
         BytesEmitter(data: [10, 20, 30, 40, 50], description: "block data")
       ], description: "block 1");
 
+      bs.writeAllBytes([
+        BytesEmitter(data: [1, 10, 100], description: "block 1"),
+        BytesEmitter(data: [2, 20, 200], description: "block 2")
+      ], description: "blocks");
+
       var s = bs.toString();
       print(s);
 
       var sh = bs.toString(hex: true);
       print(sh);
+
+      print(bs.output());
 
       expect(
           bs.output(),
@@ -191,7 +198,13 @@ void main() {
             20,
             30,
             40,
-            50
+            50,
+            1,
+            10,
+            100,
+            2,
+            20,
+            200
           ]));
 
       expect(
@@ -208,6 +221,11 @@ void main() {
               '  ## block 1:\n'
               '    ## block data:\n'
               '    [10 20 30 40 50]\n'
+              '  ## blocks:\n'
+              '    ## block 1:\n'
+              '    [1 10 100]\n'
+              '    ## block 2:\n'
+              '    [2 20 200]\n'
               ''));
 
       expect(
@@ -224,6 +242,11 @@ void main() {
               '  ## block 1:\n'
               '    ## block data:\n'
               '    [0a 14 1e 28 32]\n'
+              '  ## blocks:\n'
+              '    ## block 1:\n'
+              '    [01 0a 64]\n'
+              '    ## block 2:\n'
+              '    [02 14 c8]\n'
               ''));
     });
   });
