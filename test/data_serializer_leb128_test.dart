@@ -17,7 +17,9 @@ void main() {
       64,
       128,
       1000000,
-      1000000000
+      10000000,
+      100000000,
+      120000000,
     ];
 
     test('encodeUnsigned/decodeUnsigned', () {
