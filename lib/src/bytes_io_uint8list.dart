@@ -205,6 +205,60 @@ class BytesUint8ListIO extends BytesIO {
   }
 
   @override
+  int readTo(BytesIO io, [int? length]) {
+    length ??= remaining;
+
+    if (io is BytesUint8ListIO) {
+      final bytes = _bytes;
+      final bytes2 = io._bytes;
+
+      final offset = _position;
+      final offset2 = io._position;
+
+      for (var i = 0; i < length; ++i) {
+        var b = bytes[offset + i];
+        bytes2[offset2 + i] = b;
+      }
+
+      incrementPosition(length);
+      io.incrementPosition(length);
+
+      return length;
+    } else {
+      var bs = readBytes(length);
+      io.writeAll(bs);
+      return bs.length;
+    }
+  }
+
+  @override
+  int writeFrom(BytesIO io, [int? length]) {
+    length ??= io.remaining;
+
+    if (io is BytesUint8ListIO) {
+      final bytes = _bytes;
+      final bytes2 = io._bytes;
+
+      final offset = _position;
+      final offset2 = io._position;
+
+      for (var i = 0; i < length; ++i) {
+        var b = bytes2[offset2 + i];
+        bytes[offset + i] = b;
+      }
+
+      incrementPosition(length);
+      io.incrementPosition(length);
+
+      return length;
+    } else {
+      var bs = io.readBytes(length);
+      writeAll(bs);
+      return bs.length;
+    }
+  }
+
+  @override
   Uint8List asUint8List([int offset = 0, int? length]) =>
       _fromUint8List(_bytes, offset, length, _length);
 

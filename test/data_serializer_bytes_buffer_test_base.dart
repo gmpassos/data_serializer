@@ -1,5 +1,5 @@
-import 'dart:typed_data';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:data_serializer/data_serializer.dart';
 import 'package:test/test.dart';
@@ -112,6 +112,26 @@ void doBytesBufferTests(
     expect(time2, equals(time));
     expect(time2.millisecondsSinceEpoch, equals(timeMs));
     expect(buffer2.position, equals(16));
+
+    {
+      var lengthHalf = buffer.length ~/ 2;
+      var remaining = buffer.length - lengthHalf;
+      buffer.seek(lengthHalf);
+      expect(buffer.remaining, equals(remaining));
+
+      var buffer2Lng = buffer2.length;
+
+      var r = buffer.readTo(buffer2);
+      expect(r, equals(remaining));
+      expect(buffer2.length, equals(buffer2Lng + remaining));
+
+      var w0 = buffer.writeFrom(buffer2);
+      expect(w0, equals(0));
+
+      buffer2.seek(buffer2.length - 2);
+      var w2 = buffer.writeFrom(buffer2);
+      expect(w2, equals(2));
+    }
 
     expect(buffer.bytesIO.isClosed, isFalse);
     expect(buffer2.bytesIO.isClosed, isFalse);

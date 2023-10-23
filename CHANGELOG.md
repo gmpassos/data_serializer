@@ -1,3 +1,14 @@
+## 1.0.12
+
+- New `BitsBuffer`.
+- `BytesBuffer`:
+  - `writeWritables/readWritables`: new parameter option `leb128`.
+  - Added `writeFloat64`, `writeAllFloat64`, `readFloat64` and `readAllFloat64`.
+  - Added `writeFloat32`, `writeAllFloat32`, `readFloat32` and `readAllFloat32`.
+  - Added `readTo` and `writeFrom`.
+
+- test: ^1.24.8
+
 ## 1.0.11
 
 - Added support to `Leb128`.

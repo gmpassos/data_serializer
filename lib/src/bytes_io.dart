@@ -88,6 +88,12 @@ abstract class BytesIO {
   /// Writes all the `int` at [list] as bytes.
   int writeAll(List<int> list);
 
+  /// Read [length] bytes into [io].
+  int readTo(BytesIO io, [int? length]);
+
+  /// Writes [length] bytes from [io].
+  int writeFrom(BytesIO io, [int? length]);
+
   /// Returns `this` instance as a [Uint8List]. Returns the internal `bytes`
   /// buffer if the [length] and [capacity] is the same, otherwise creates a
   /// copy with the exact [length].

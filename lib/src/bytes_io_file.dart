@@ -363,6 +363,22 @@ class BytesFileIO extends BytesIO {
   }
 
   @override
+  int readTo(BytesIO io, [int? length]) {
+    length ??= remaining;
+    var bs = readBytes(length);
+    io.writeAll(bs);
+    return bs.length;
+  }
+
+  @override
+  int writeFrom(BytesIO io, [int? length]) {
+    length ??= io.remaining;
+    var bs = io.readBytes(length);
+    writeAll(bs);
+    return bs.length;
+  }
+
+  @override
   Uint8List asUint8List([int offset = 0, int? length]) =>
       toBytes(offset, length);
 
