@@ -6,25 +6,124 @@ void main() {
     test('writeBits: 0xFF @ 1...', () {
       var buffer = BitsBuffer();
 
+      expect(buffer.bytesBuffer.position, equals(0));
+      expect(buffer.bytesBuffer.length, equals(0));
       expect(buffer.unflushedBitsLength, equals(0));
+      expect(buffer.length, equals(0));
+
       expect(buffer.writeBits(1, 1), equals(1));
+      expect(buffer.bytesBuffer.position, equals(0));
+      expect(buffer.bytesBuffer.length, equals(0));
       expect(buffer.unflushedBitsLength, equals(1));
+      expect(buffer.length, equals(0));
+
       expect(buffer.writeBits(1, 1), equals(1));
       expect(buffer.unflushedBitsLength, equals(2));
+      expect(buffer.bytesBuffer.position, equals(0));
+      expect(buffer.bytesBuffer.length, equals(0));
+      expect(buffer.length, equals(0));
+
       expect(buffer.writeBits(1, 1), equals(1));
       expect(buffer.unflushedBitsLength, equals(3));
-      expect(buffer.writeBits(1, 1), equals(1));
+      expect(buffer.bytesBuffer.position, equals(0));
+      expect(buffer.bytesBuffer.length, equals(0));
+      expect(buffer.length, equals(0));
+
+      expect(buffer.writeBit(true), equals(1));
       expect(buffer.unflushedBitsLength, equals(4));
+      expect(buffer.bytesBuffer.position, equals(0));
+      expect(buffer.bytesBuffer.length, equals(0));
+      expect(buffer.length, equals(0));
+
       expect(buffer.writeBits(1, 1), equals(1));
       expect(buffer.unflushedBitsLength, equals(5));
       expect(buffer.writeBits(1, 1), equals(1));
       expect(buffer.unflushedBitsLength, equals(6));
-      expect(buffer.writeBits(1, 1), equals(1));
+      expect(buffer.length, equals(0));
+
+      expect(buffer.writeBit(true), equals(1));
       expect(buffer.unflushedBitsLength, equals(7));
+      expect(buffer.bytesBuffer.position, equals(0));
+      expect(buffer.bytesBuffer.length, equals(0));
+      expect(buffer.length, equals(0));
+      expect(buffer.length, equals(0));
+
       expect(buffer.writeBits(1, 1), equals(1));
       expect(buffer.unflushedBitsLength, equals(0));
+      expect(buffer.bytesBuffer.position, equals(1));
+      expect(buffer.bytesBuffer.length, equals(1));
+      expect(buffer.length, equals(1));
 
       expect(buffer.toBytes(), equals([0xFF]));
+
+      buffer.writeByte(0x02);
+
+      expect(buffer.toBytes(), equals([0xFF, 0x02]));
+
+      buffer.writeBytes([0x03, 0x04]);
+
+      expect(buffer.toBytes(), equals([0xFF, 0x02, 0x03, 0x04]));
+      expect(buffer.hasUnflushedBits, isFalse);
+
+      expect(buffer.writeBits(0x05, 3), equals(3));
+      expect(buffer.hasUnflushedBits, isTrue);
+
+      expect(buffer.writePadding(), 5);
+      expect(buffer.hasUnflushedBits, isFalse);
+      expect(buffer.toBytes(), equals([0xFF, 0x02, 0x03, 0x04, 0xB0]));
+
+      buffer.seek(0);
+
+      var paddingPos = buffer.length - 1;
+
+      expect(buffer.hasUnflushedBits, isFalse);
+      expect(buffer.isAtPadding(paddingPosition: paddingPos), isFalse);
+
+      expect(buffer.readBit(), equals(1));
+      expect(buffer.hasUnflushedBits, isTrue);
+      expect(buffer.position, equals(1));
+      expect(buffer.isAtPadding(paddingPosition: paddingPos), isFalse);
+
+      expect(buffer.readBits(2), equals(0x03));
+      expect(buffer.hasUnflushedBits, isTrue);
+      expect(buffer.position, equals(1));
+      expect(buffer.isAtPadding(paddingPosition: paddingPos), isFalse);
+
+      expect(buffer.readBits(5), equals(0x1F));
+      expect(buffer.hasUnflushedBits, isFalse);
+      expect(buffer.position, equals(1));
+      expect(buffer.isAtPadding(paddingPosition: paddingPos), isFalse);
+
+      expect(buffer.readBits(8), equals(0x02));
+      expect(buffer.hasUnflushedBits, isFalse);
+      expect(buffer.position, equals(2));
+      expect(buffer.isAtPadding(paddingPosition: paddingPos), isFalse);
+
+      expect(buffer.readByte(), equals(0x03));
+      expect(buffer.hasUnflushedBits, isFalse);
+      expect(buffer.position, equals(3));
+      expect(buffer.isAtPadding(paddingPosition: paddingPos), isFalse);
+
+      expect(buffer.readByte(), equals(0x04));
+      expect(buffer.hasUnflushedBits, isFalse);
+      expect(buffer.position, equals(4));
+      expect(buffer.isAtPadding(paddingPosition: paddingPos), isFalse);
+
+      expect(buffer.readBit(), equals(1));
+      expect(buffer.hasUnflushedBits, isTrue);
+      expect(buffer.position, equals(5));
+      expect(buffer.isAtPadding(paddingPosition: paddingPos), isFalse);
+
+      expect(buffer.readBit(), equals(0));
+      expect(buffer.hasUnflushedBits, isTrue);
+      expect(buffer.position, equals(5));
+      expect(buffer.isAtPadding(paddingPosition: paddingPos), isFalse);
+
+      expect(buffer.readBit(), equals(1));
+      expect(buffer.hasUnflushedBits, isTrue);
+      expect(buffer.position, equals(5));
+      expect(buffer.isAtPadding(paddingPosition: paddingPos), isTrue);
+      expect(buffer.hasUnflushedBits, isFalse);
     });
 
     test('writeBits: 0xFF @ 2 3...', () {

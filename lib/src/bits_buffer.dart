@@ -177,13 +177,14 @@ class BitsBuffer {
     return b;
   }
 
-  /// Writes padding bits to ensure proper byte alignment.
+  /// Writes padding bits to ensure proper byte alignment and
+  /// returns the length of the written padding.
   ///
   /// Since data is flushed in blocks of 8 bits (bytes), if the internal buffer's
   /// size is not a multiple of 8, padding bits are needed to ensure that the
   /// remaining bits are properly flushed.
   ///
-  /// The padding format consists of a `1` bit (the head) and an optional
+  /// The padding format consists of a `1` bit (the head) followed by an optional
   /// sequence of `0` bits until a full byte is completed.
   ///
   /// Example:
@@ -197,17 +198,18 @@ class BitsBuffer {
   ///   is written to [bytesBuffer].
   ///
   /// See [isAtPadding].
-  void writePadding() {
+  int writePadding() {
     if (_bitsBufferLength == 0) {
       var padding = (1 << 7);
       _bytesBuffer.writeByte(padding);
+      return 8;
     } else {
       final gapBits = 8 - _bitsBufferLength;
       assert(gapBits > 0);
 
       var padding = 1 << (gapBits - 1);
 
-      writeBits(padding, gapBits);
+      return writeBits(padding, gapBits);
     }
   }
 
