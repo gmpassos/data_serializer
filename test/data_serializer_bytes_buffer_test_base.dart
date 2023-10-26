@@ -165,6 +165,13 @@ void doBytesBufferTests(
       var lng = buffer.length;
       buffer2.readTo(buffer);
       expect(buffer.length, equals(lng + remaining2));
+
+      buffer2.seek(0);
+
+      remaining2 = buffer2.remaining;
+      lng = buffer.length;
+      buffer.writeFrom(buffer2);
+      expect(buffer.length, equals(lng + remaining2));
     }
 
     expect(buffer.bytesIO.isClosed, isFalse);
