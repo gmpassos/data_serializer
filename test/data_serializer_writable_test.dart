@@ -53,7 +53,7 @@ void main() {
       expect(o1.serializeBufferLength, greaterThan(8));
     });
 
-    test('writeWritable/readWritable', () {
+    test('writeWritable/readWritable 1', () {
       var buffer = BytesBuffer();
 
       buffer.writeWritable(FooWritable(101, 'FOO'));
@@ -74,6 +74,43 @@ void main() {
 
       var list =
           buffer.readWritables((input) => FooWritable.deserialize(input));
+
+      expect(list.length, equals(3));
+
+      expect(list[0], equals(FooWritable(10, 'Foo')));
+      expect(list[1], equals(FooWritable(11, 'Bar')));
+      expect(list[2], equals(FooWritable(12, 'Baz')));
+
+      var list2 =
+          buffer.readWritables((input) => FooWritable.deserialize(input));
+
+      expect(list2.length, equals(2));
+
+      expect(list2[0], equals(FooWritable(11, 'Bar1')));
+      expect(list2[1], equals(FooWritable(12, 'Baz2')));
+    });
+
+    test('writeWritable/readWritable 2', () {
+      var buffer = BytesBuffer();
+
+      buffer.writeWritable(FooWritable(101, 'FOO'));
+
+      buffer.writeWritables([
+        FooWritable(10, 'Foo'),
+        FooWritable(11, 'Bar'),
+        FooWritable(12, 'Baz'),
+      ], leb128: true);
+
+      [FooWritable(11, 'Bar1'), FooWritable(12, 'Baz2')].writeTo(buffer);
+
+      buffer.seek(0);
+
+      var o = buffer.readWritable((input) => FooWritable.deserialize(input));
+
+      expect(o, equals(FooWritable(101, 'FOO')));
+
+      var list = buffer.readWritables((input) => FooWritable.deserialize(input),
+          leb128: true);
 
       expect(list.length, equals(3));
 

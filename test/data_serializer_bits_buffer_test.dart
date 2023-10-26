@@ -283,10 +283,15 @@ void main() {
       expect(buffer.unflushedBitsLength, equals(0));
       expect(buffer.length, equals(lng + 3));
 
-      expect(buffer.writePadding(), equals(8));
+      expect(buffer.writeBits(0xA5, 8), equals(8));
       expect(buffer.hasUnflushedBits, isFalse);
       expect(buffer.unflushedBitsLength, equals(0));
       expect(buffer.length, equals(lng + 4));
+
+      expect(buffer.writePadding(), equals(8));
+      expect(buffer.hasUnflushedBits, isFalse);
+      expect(buffer.unflushedBitsLength, equals(0));
+      expect(buffer.length, equals(lng + 5));
     });
   });
 }
