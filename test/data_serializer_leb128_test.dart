@@ -58,6 +58,36 @@ void main() {
           expect(Leb128.decodeSigned(bs3), equals(n3));
         }
       }
+
+      for (var n = -1000000; n <= 1000000; n += 11) {
+        for (var i = -3; i <= 3; ++i) {
+          var n3 = n + i;
+
+          var bs3 = Leb128.encodeSigned(n3);
+          expect(Leb128.decodeSigned(bs3), equals(n3));
+        }
+      }
+
+      for (var n = -10000000; n <= 10000000; n += 211) {
+        for (var i = -3; i <= 3; ++i) {
+          var n3 = n + i;
+
+          var bs3 = Leb128.encodeSigned(n3);
+          expect(Leb128.decodeSigned(bs3), equals(n3));
+        }
+      }
+
+      var max = (1 << 36);
+      var min = -max;
+
+      for (var n = min; n <= max; n += 999983) {
+        for (var i = -3; i <= 3; ++i) {
+          var n3 = n + i;
+
+          var bs3 = Leb128.encodeSigned(n3);
+          expect(Leb128.decodeSigned(bs3), equals(n3));
+        }
+      }
     });
 
     test('encodeUnsigned/decodeUnsigned', () {
@@ -227,6 +257,41 @@ void main() {
       expect(bs.readLeb128Block(), equals([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]));
 
       expect(bs.readLeb128Block(), equals([10, 20, 30]));
+    });
+
+    test('basic 4', () {
+      var bs = BytesBuffer();
+
+      {
+        var blk = BytesBuffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 0].asUint8List);
+        bs.writeLeb128BlockFrom(blk);
+      }
+
+      {
+        var blk = BytesBuffer.from([10, 20, 30].asUint8List);
+        bs.writeLeb128BlockFrom(blk);
+      }
+
+      expect(bs.length, equals(1 + 10 + 1 + 3));
+
+      expect(bs.toBytes(),
+          equals([10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 3, 10, 20, 30]));
+
+      bs.seek(0);
+
+      {
+        var blk = BytesBuffer();
+        bs.readLeb128BlockTo(blk);
+
+        expect(blk.toBytes(), equals([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]));
+      }
+
+      {
+        var blk = BytesBuffer();
+        bs.readLeb128BlockTo(blk);
+
+        expect(blk.toBytes(), equals([10, 20, 30]));
+      }
     });
   });
 }
