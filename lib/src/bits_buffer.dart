@@ -9,10 +9,13 @@ class BitsBuffer {
   BitsBuffer([int initialCapacity = 32])
       : _bytesBuffer = BytesBuffer(initialCapacity);
 
+  BitsBuffer.from(BytesBuffer bytes) : _bytesBuffer = bytes;
+
+  BitsBuffer.fromBytes(List<int> bytes)
+      : this.from(BytesBuffer.from(bytes.asUint8List));
+
   /// The internal [BytesBuffer].
   BytesBuffer get bytesBuffer => _bytesBuffer;
-
-  BitsBuffer.from(BytesBuffer bytes) : _bytesBuffer = bytes;
 
   int seek(int position) => _bytesBuffer.seek(position);
 
