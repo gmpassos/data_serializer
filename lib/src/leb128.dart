@@ -224,6 +224,20 @@ extension BytesBufferLeb128Extension on BytesBuffer {
     return writeAll(block);
   }
 
+  /// Reads a LEB128 bytes block into [dst].
+  int readLeb128BlockTo(BytesBuffer dst) {
+    var blockSize = readLeb128UnsignedInt();
+    return readTo(dst, blockSize);
+  }
+
+  /// Writes a LEB128 bytes [block] from [src].
+  int writeLeb128BlockFrom(BytesBuffer src, [int? length]) {
+    length ??= src.length;
+    var bsLng = Leb128.encodeUnsigned(length);
+    writeAllBytes(bsLng);
+    return writeFrom(src, length) + bsLng.length;
+  }
+
   /// Reads a [String] inside a LEB128 bytes block.
   String readLeb128String(
       {dart_convert.Encoding encoding = dart_convert.latin1}) {

@@ -1,5 +1,5 @@
-import 'dart:typed_data';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:data_serializer/data_serializer.dart';
 import 'package:test/test.dart';
@@ -112,6 +112,67 @@ void doBytesBufferTests(
     expect(time2, equals(time));
     expect(time2.millisecondsSinceEpoch, equals(timeMs));
     expect(buffer2.position, equals(16));
+
+    {
+      final lengthHalf = buffer.length ~/ 2;
+      final remaining = buffer.length - lengthHalf;
+
+      buffer.seek(lengthHalf);
+      expect(buffer.remaining, equals(remaining));
+
+      var buffer2Lng = buffer2.length;
+
+      var r = buffer.readTo(buffer2);
+      expect(r, equals(remaining));
+      expect(buffer2.length, equals(buffer2Lng + remaining));
+
+      var w0 = buffer.writeFrom(buffer2);
+      expect(w0, equals(0));
+
+      buffer2.seek(buffer2.length - 2);
+      var w2 = buffer.writeFrom(buffer2);
+      expect(w2, equals(2));
+    }
+
+    {
+      final lengthHalf = buffer.length ~/ 2;
+      final remaining = buffer.length - lengthHalf;
+
+      buffer.seek(lengthHalf);
+      expect(buffer.remaining, equals(remaining));
+
+      var buffer2 = BytesBuffer();
+
+      var buffer2Lng = buffer2.length;
+
+      var r = buffer.readTo(buffer2);
+      expect(r, equals(remaining));
+      expect(buffer2.length, equals(buffer2Lng + remaining));
+
+      var w0 = buffer.writeFrom(buffer2);
+      expect(w0, equals(0));
+
+      buffer2.seek(buffer2.length - 2);
+      var w2 = buffer.writeFrom(buffer2);
+      expect(w2, equals(2));
+
+      buffer2.seek(0);
+
+      print(buffer);
+      print(buffer2);
+
+      var remaining2 = buffer2.remaining;
+      var lng = buffer.length;
+      buffer2.readTo(buffer);
+      expect(buffer.length, equals(lng + remaining2));
+
+      buffer.seek(0);
+
+      var remaining1 = buffer.remaining;
+      var lng2 = buffer2.length;
+      buffer2.writeFrom(buffer);
+      expect(buffer2.length, equals(lng2 + remaining1));
+    }
 
     expect(buffer.bytesIO.isClosed, isFalse);
     expect(buffer2.bytesIO.isClosed, isFalse);
@@ -483,5 +544,108 @@ void doBytesBufferTests(
     expect(buffer.indexOf(20), equals(-1));
 
     expect(() => buffer.readBlocks(), throwsA(isA<BytesBufferEOF>()));
+  });
+
+  test('writeFloat64/writeAllFloat64', () {
+    var buffer = createBsBuff();
+
+    buffer.writeFloat64(123.456);
+    expect(buffer.length, equals(8));
+
+    buffer.writeAllFloat64([10.11, 20.22, 30.33]);
+    expect(buffer.length, equals(32));
+
+    buffer.seek(0);
+
+    expect(buffer.readFloat64(), equals(123.456));
+    expect(buffer.position, equals(8));
+
+    expect(buffer.readAllFloat64(3), equals([10.11, 20.22, 30.33]));
+    expect(buffer.position, equals(32));
+
+    var bs = buffer.toBytes();
+    print(bs);
+    expect(
+        bs,
+        equals([
+          64,
+          94,
+          221,
+          47,
+          26,
+          159,
+          190,
+          119,
+          64,
+          36,
+          56,
+          81,
+          235,
+          133,
+          30,
+          184,
+          64,
+          52,
+          56,
+          81,
+          235,
+          133,
+          30,
+          184,
+          64,
+          62,
+          84,
+          122,
+          225,
+          71,
+          174,
+          20
+        ]));
+  });
+
+  test('writeFloat32/writeAllFloat32', () {
+    var buffer = createBsBuff();
+
+    buffer.writeFloat32(123.456);
+    expect(buffer.length, equals(4));
+
+    buffer.writeAllFloat32([10.11, 20.22, 30.33]);
+    expect(buffer.length, equals(16));
+
+    buffer.seek(0);
+
+    expect(buffer.readFloat32(), inInclusiveRange(123.456, 123.457));
+
+    expect(buffer.position, equals(4));
+
+    var fs = buffer.readAllFloat32(3);
+    expect(fs.length, equals(3));
+    expect(fs[0], inInclusiveRange(10.09, 10.12));
+    expect(fs[1], inInclusiveRange(20.21, 20.23));
+    expect(fs[2], inInclusiveRange(30.32, 30.34));
+    expect(buffer.position, equals(16));
+
+    var bs = buffer.toBytes();
+    print(bs);
+    expect(
+        bs,
+        equals([
+          66,
+          246,
+          233,
+          121,
+          65,
+          33,
+          194,
+          143,
+          65,
+          161,
+          194,
+          143,
+          65,
+          242,
+          163,
+          215
+        ]));
   });
 }

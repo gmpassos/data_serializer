@@ -1,12 +1,7 @@
 import "dart:convert";
 import 'dart:typed_data';
 
-import 'bytes_io.dart';
-import 'bytes_io_uint8list.dart';
-import 'extension.dart';
-import 'int_codec.dart';
-import 'platform.dart';
-import 'utils.dart';
+import 'package:data_serializer/data_serializer.dart';
 
 final DataSerializerPlatform _platform = DataSerializerPlatform.instance;
 
@@ -183,13 +178,18 @@ class BytesBuffer {
   }
 
   /// Writes a [list] of [Writable].
-  int writeWritables(Iterable<Writable> list) {
+  /// - If [leb128] is `true` will use [writeLeb128UnsignedInt] to write the size of the [list].
+  int writeWritables(Iterable<Writable> list, {bool leb128 = false}) {
     var length = list.length;
 
     bytesIO.ensureCapacity(position + 4 + (length * 8));
 
-    writeInt32(length);
-    var sz = 4;
+    int sz;
+    if (leb128) {
+      sz = writeLeb128UnsignedInt(length);
+    } else {
+      sz = writeUint32(length);
+    }
 
     for (var e in list) {
       sz += e.writeTo(this);
@@ -199,9 +199,17 @@ class BytesBuffer {
   }
 
   /// Reads a list of [Writable] using the [reader] function to instantiate the [W] elements.
+  /// - If [leb128] is `true` will use [readLeb128UnsignedInt] to read the size of the list.
   List<W> readWritables<W extends Writable>(
-      W Function(BytesBuffer input) reader) {
-    var sz = readInt32();
+      W Function(BytesBuffer input) reader,
+      {bool leb128 = false}) {
+    int sz;
+    if (leb128) {
+      sz = readLeb128UnsignedInt();
+    } else {
+      sz = readInt32();
+    }
+
     var list = List.generate(sz, (i) => reader(this));
     return list;
   }
@@ -367,6 +375,80 @@ class BytesBuffer {
     }
   }
 
+  /// Writes a [double] 64 bits.
+  int writeFloat64(double n) {
+    var byteData = ByteData(8);
+    return _writeFloat64(n, byteData);
+  }
+
+  /// Writes all [ns] as [double] 64 bits.
+  int writeAllFloat64(List<double> ns) {
+    final length = ns.length;
+    var byteData = ByteData(8);
+    var sz = 0;
+    for (var i = 0; i < length; ++i) {
+      sz += _writeFloat64(ns[i], byteData);
+    }
+    return sz;
+  }
+
+  int _writeFloat64(double n, ByteData byteData) {
+    byteData.setFloat64(0, n);
+    var bs = byteData.buffer.asUint8List();
+    return writeBytes(bs, 0, 8);
+  }
+
+  /// Reads a [double] 64 bits.
+  double readFloat64() {
+    var bs = readBytes(8);
+    var byteData = ByteData.sublistView(bs);
+    return byteData.getFloat64(0);
+  }
+
+  /// Reads a List of 64-bit [double] values with a specified [length].
+  List<double> readAllFloat64(int length) {
+    var bs = readBytes(length * 8);
+    var byteData = ByteData.sublistView(bs);
+    return List.generate(length, (i) => byteData.getFloat64(i * 8));
+  }
+
+  /// Writes a [double] 32 bits.
+  int writeFloat32(double n) {
+    var byteData = ByteData(4);
+    return _writeFloat32(n, byteData);
+  }
+
+  /// Writes all [ns] as [double] 32 bits.
+  int writeAllFloat32(List<double> ns) {
+    final length = ns.length;
+    var byteData = ByteData(4);
+    var sz = 0;
+    for (var i = 0; i < length; ++i) {
+      sz += _writeFloat32(ns[i], byteData);
+    }
+    return sz;
+  }
+
+  int _writeFloat32(double n, ByteData byteData) {
+    byteData.setFloat32(0, n);
+    var bs = byteData.buffer.asUint8List();
+    return writeBytes(bs, 0, 4);
+  }
+
+  /// Reads a [double] 32 bits.
+  double readFloat32() {
+    var bs = readBytes(4);
+    var byteData = ByteData.sublistView(bs);
+    return byteData.getFloat32(0);
+  }
+
+  /// Reads a List of 32-bit [double] values with a specified [length].
+  List<double> readAllFloat32(int length) {
+    var bs = readBytes(length * 4);
+    var byteData = ByteData.sublistView(bs);
+    return List.generate(length, (i) => byteData.getFloat32(i * 4));
+  }
+
   /// Writes a [DateTime].
   int writeDateTime(DateTime dateTime) => dateTime.writeTo(this);
 
@@ -374,6 +456,23 @@ class BytesBuffer {
   DateTime readDateTime() {
     var t = readInt64();
     return DateTime.fromMillisecondsSinceEpoch(t, isUtc: true);
+  }
+
+  /// Reads [length] bytes into [dst].
+  int readTo(BytesBuffer dst, [int? length]) {
+    length ??= remaining;
+    final bytesIO2 = dst.bytesIO;
+    final pos = bytesIO2.position;
+    bytesIO2.ensureCapacity(pos + length);
+    return bytesIO.readTo(bytesIO2, length);
+  }
+
+  /// Writes [length] bytes from [src].
+  int writeFrom(BytesBuffer src, [int? length]) {
+    length ??= src.remaining;
+    final pos = bytesIO.position;
+    bytesIO.ensureCapacity(pos + length);
+    return bytesIO.writeFrom(src.bytesIO, length);
   }
 
   /// Sets the [length] of this buffer. Increases internal bytes buffer [capacity] if needed.
