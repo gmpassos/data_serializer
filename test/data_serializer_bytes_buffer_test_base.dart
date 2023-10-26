@@ -504,4 +504,45 @@ void doBytesBufferTests(
 
     expect(() => buffer.readBlocks(), throwsA(isA<BytesBufferEOF>()));
   });
+
+  test('writeFloat64/writeAllFloat64', () {
+    var buffer = createBsBuff();
+
+    buffer.writeFloat64(123.456);
+    expect(buffer.length, equals(8));
+
+    buffer.writeAllFloat64([10.11, 20.22, 30.33]);
+    expect(buffer.length, equals(32));
+
+    buffer.seek(0);
+
+    expect(buffer.readFloat64(), equals(123.456));
+    expect(buffer.position, equals(8));
+
+    expect(buffer.readAllFloat64(3), equals([10.11, 20.22, 30.33]));
+    expect(buffer.position, equals(32));
+  });
+
+  test('writeFloat32/writeAllFloat32', () {
+    var buffer = createBsBuff();
+
+    buffer.writeFloat32(123.456);
+    expect(buffer.length, equals(4));
+
+    buffer.writeAllFloat32([10.11, 20.22, 30.33]);
+    expect(buffer.length, equals(16));
+
+    buffer.seek(0);
+
+    expect(buffer.readFloat32(), inInclusiveRange(123.456, 123.457));
+
+    expect(buffer.position, equals(4));
+
+    var fs = buffer.readAllFloat32(3);
+    expect(fs.length, equals(3));
+    expect(fs[0], inInclusiveRange(10.09, 10.12));
+    expect(fs[1], inInclusiveRange(20.21, 20.23));
+    expect(fs[2], inInclusiveRange(30.32, 30.34));
+    expect(buffer.position, equals(16));
+  });
 }
