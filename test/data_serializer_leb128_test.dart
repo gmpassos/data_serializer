@@ -210,5 +210,23 @@ void main() {
 
       expect(bs.readLeb128String(), equals("Foooooooooooooooooooooooooooooo"));
     });
+
+    test('basic 3', () {
+      var bs = BytesBuffer();
+
+      bs.writeLeb128Block([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]);
+      bs.writeLeb128Block([10, 20, 30]);
+
+      expect(bs.length, equals(1 + 10 + 1 + 3));
+
+      expect(bs.toBytes(),
+          equals([10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 3, 10, 20, 30]));
+
+      bs.seek(0);
+
+      expect(bs.readLeb128Block(), equals([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]));
+
+      expect(bs.readLeb128Block(), equals([10, 20, 30]));
+    });
   });
 }
