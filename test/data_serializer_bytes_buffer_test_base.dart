@@ -114,10 +114,34 @@ void doBytesBufferTests(
     expect(buffer2.position, equals(16));
 
     {
-      var lengthHalf = buffer.length ~/ 2;
-      var remaining = buffer.length - lengthHalf;
+      final lengthHalf = buffer.length ~/ 2;
+      final remaining = buffer.length - lengthHalf;
+
       buffer.seek(lengthHalf);
       expect(buffer.remaining, equals(remaining));
+
+      var buffer2Lng = buffer2.length;
+
+      var r = buffer.readTo(buffer2);
+      expect(r, equals(remaining));
+      expect(buffer2.length, equals(buffer2Lng + remaining));
+
+      var w0 = buffer.writeFrom(buffer2);
+      expect(w0, equals(0));
+
+      buffer2.seek(buffer2.length - 2);
+      var w2 = buffer.writeFrom(buffer2);
+      expect(w2, equals(2));
+    }
+
+    {
+      final lengthHalf = buffer.length ~/ 2;
+      final remaining = buffer.length - lengthHalf;
+
+      buffer.seek(lengthHalf);
+      expect(buffer.remaining, equals(remaining));
+
+      var buffer2 = BytesBuffer();
 
       var buffer2Lng = buffer2.length;
 
