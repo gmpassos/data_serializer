@@ -1,3 +1,24 @@
+## 1.1.0
+
+Dart `3.3.0` compatibility changes:
+
+- `ListGenericExtension`:
+  - Renamed getter `asUnmodifiableView` to method `asUnmodifiableListView`.
+
+- `Uint8ListDataExtension`:
+  - Removed getter `asUnmodifiableView` to allow use of `Uint8List.asUnmodifiableView`.
+- `Uint32ListDataExtension`:
+  - Removed getter `asUnmodifiableView` to allow use of `Uint32List.asUnmodifiableView`.
+- `Uint64ListDataExtension`:
+  - Removed getter `asUnmodifiableView` to allow use of `Uint64List.asUnmodifiableView`.
+
+- sdk: '>=3.3.0 <4.0.0'
+
+- lints: ^3.0.0
+- test: ^1.25.2
+- coverage: ^1.7.2
+- path: ^1.9.0
+
 ## 1.0.12
 
 - New `BitsBuffer`.
