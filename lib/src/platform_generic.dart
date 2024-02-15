@@ -12,10 +12,10 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
   static final int _minSafeInt = -9007199254740991;
 
   static final Uint8List _maxSafeIntBytes =
-      '001FFFFFFFFFFFFF'.decodeHex().asUnmodifiableView;
+      '001FFFFFFFFFFFFF'.decodeHex().asUnmodifiableView();
 
   static final Uint8List _minSafeIntBytes =
-      'FFE0000000000001'.decodeHex().asUnmodifiableView;
+      'FFE0000000000001'.decodeHex().asUnmodifiableView();
 
   @override
   int get maxSafeInt => _maxSafeInt;

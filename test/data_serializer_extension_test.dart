@@ -27,10 +27,10 @@ void main() {
 
       expect(l1.reversedList(), equals([8, 7, 6, 5, 4, 3, 2, 1]));
 
-      expect(l1.asUnmodifiableView,
+      expect(l1.asUnmodifiableListView(),
           allOf(equals([1, 2, 3, 4, 5, 6, 7, 8]), isA<UnmodifiableListView>()));
 
-      expect(l1.asUnmodifiableView.asUnmodifiableView,
+      expect(l1.asUnmodifiableListView().asUnmodifiableListView(),
           allOf(equals([1, 2, 3, 4, 5, 6, 7, 8]), isA<UnmodifiableListView>()));
 
       l2.copyTo(2, l1, 2, 3);
@@ -150,7 +150,7 @@ void main() {
               equals([0x01020304, 0x05060708])));
 
       expect(
-          ns32.asUnmodifiableView,
+          ns32.asUnmodifiableView(),
           allOf(isA<UnmodifiableUint32ListView>(),
               equals([0x01020304, 0x05060708])));
 

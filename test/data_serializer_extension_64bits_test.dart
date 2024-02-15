@@ -67,7 +67,7 @@ void main() {
               isA<UnmodifiableUint64ListView>()));
 
       expect(
-          ns64.asUnmodifiableView,
+          ns64.asUnmodifiableView(),
           allOf(equals([0x02030405060708, 0x03040506070809]),
               isA<UnmodifiableUint64ListView>()));
 

@@ -439,7 +439,7 @@ extension ListGenericExtension<T> on List<T> {
   /// Returns an unmodifiable view of `this` instance.
   ///
   /// - Will just cast if is already an [UnmodifiableListView].
-  UnmodifiableListView<T> get asUnmodifiableView {
+  UnmodifiableListView<T> asUnmodifiableListView() {
     var self = this;
     return self is UnmodifiableListView<T>
         ? self
@@ -526,16 +526,6 @@ extension Uint8ListDataExtension on Uint8List {
 
   /// Returns an unmodifiable copy of `this` instance.
   Uint8List copyAsUnmodifiable() => UnmodifiableUint8ListView(copy());
-
-  /// Returns an unmodifiable view of `this` instance.
-  ///
-  /// - Will just cast if is already an [UnmodifiableUint8ListView].
-  UnmodifiableUint8ListView get asUnmodifiableView {
-    var self = this;
-    return self is UnmodifiableUint8ListView
-        ? self
-        : UnmodifiableUint8ListView(self);
-  }
 
   /// Decodes `this` bytes as a `LATIN-1` [String].
   String toStringLatin1() => dart_convert.latin1.decode(this);
@@ -880,16 +870,6 @@ extension Uint32ListDataExtension on Uint32List {
   /// Returns an unmodifiable copy of `this` instance.
   Uint32List copyAsUnmodifiable() => UnmodifiableUint32ListView(copy());
 
-  /// Returns an unmodifiable view of `this` instance.
-  ///
-  /// - Will just cast if is already an [UnmodifiableUint32ListView].
-  UnmodifiableUint32ListView get asUnmodifiableView {
-    var self = this;
-    return self is UnmodifiableUint32ListView
-        ? self
-        : UnmodifiableUint32ListView(self);
-  }
-
   /// Converts this instance to an [Uint8List] with elements in [endian]ness.
   Uint8List convertToUint8List([Endian endian = Endian.big]) {
     if (Endian.host == endian) {
@@ -963,16 +943,6 @@ extension Uint64ListDataExtension on Uint64List {
 
   /// Returns an unmodifiable copy of `this` instance.
   Uint64List copyAsUnmodifiable() => UnmodifiableUint64ListView(copy());
-
-  /// Returns an unmodifiable view of `this` instance.
-  ///
-  /// - Will just cast if is already an [UnmodifiableUint64ListView].
-  UnmodifiableUint64ListView get asUnmodifiableView {
-    var self = this;
-    return self is UnmodifiableUint64ListView
-        ? self
-        : UnmodifiableUint64ListView(self);
-  }
 
   /// Converts this instance to an [Uint8List] with elements in [endian]ness.
   Uint8List convertToUint8List([Endian endian = Endian.big]) {

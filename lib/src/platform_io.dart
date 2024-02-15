@@ -12,10 +12,10 @@ class DataSerializerPlatformIO extends DataSerializerPlatform {
   static final int _minSafeInt = -9223372036854775808;
 
   static final Uint8List _maxSafeIntBytes =
-      _maxSafeInt.toUint8List64().asUnmodifiableView;
+      _maxSafeInt.toUint8List64().asUnmodifiableView();
 
   static final Uint8List _minSafeIntBytes =
-      _minSafeInt.toUint8List64().asUnmodifiableView;
+      _minSafeInt.toUint8List64().asUnmodifiableView();
 
   @override
   int get maxSafeInt => _maxSafeInt;

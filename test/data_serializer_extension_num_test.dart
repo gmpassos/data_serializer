@@ -197,7 +197,7 @@ void main() {
       expect(() => Uint8List.fromList([1, 2, 3]).copyAsUnmodifiable()..[0] = 10,
           throwsA(isA<Error>()));
 
-      expect(() => Uint8List.fromList([1, 2, 3]).asUnmodifiableView..[0] = 10,
+      expect(() => Uint8List.fromList([1, 2, 3]).asUnmodifiableView()..[0] = 10,
           throwsA(isA<Error>()));
 
       expect(Uint8List.fromList([1, 10, 20, 30]).bytesHashCode(),
