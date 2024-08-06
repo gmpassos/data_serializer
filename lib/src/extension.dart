@@ -525,7 +525,7 @@ extension Uint8ListDataExtension on Uint8List {
   Uint8List copy() => Uint8List.fromList(this);
 
   /// Returns an unmodifiable copy of `this` instance.
-  Uint8List copyAsUnmodifiable() => UnmodifiableUint8ListView(copy());
+  Uint8List copyAsUnmodifiable() => copy().asUnmodifiableView();
 
   /// Decodes `this` bytes as a `LATIN-1` [String].
   String toStringLatin1() => dart_convert.latin1.decode(this);
@@ -868,7 +868,7 @@ extension Uint32ListDataExtension on Uint32List {
   Uint32List copy() => Uint32List.fromList(this);
 
   /// Returns an unmodifiable copy of `this` instance.
-  Uint32List copyAsUnmodifiable() => UnmodifiableUint32ListView(copy());
+  Uint32List copyAsUnmodifiable() => copy().asUnmodifiableView();
 
   /// Converts this instance to an [Uint8List] with elements in [endian]ness.
   Uint8List convertToUint8List([Endian endian = Endian.big]) {
@@ -942,7 +942,7 @@ extension Uint64ListDataExtension on Uint64List {
   Uint64List copy() => Uint64List.fromList(this);
 
   /// Returns an unmodifiable copy of `this` instance.
-  Uint64List copyAsUnmodifiable() => UnmodifiableUint64ListView(copy());
+  Uint64List copyAsUnmodifiable() => copy().asUnmodifiableView();
 
   /// Converts this instance to an [Uint8List] with elements in [endian]ness.
   Uint8List convertToUint8List([Endian endian = Endian.big]) {

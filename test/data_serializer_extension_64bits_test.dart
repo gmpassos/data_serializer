@@ -61,15 +61,11 @@ void main() {
 
       expect(ns64.copy(), equals([0x02030405060708, 0x03040506070809]));
 
-      expect(
-          ns64.copyAsUnmodifiable(),
-          allOf(equals([0x02030405060708, 0x03040506070809]),
-              isA<UnmodifiableUint64ListView>()));
+      expect(ns64.copyAsUnmodifiable(),
+          equals([0x02030405060708, 0x03040506070809]));
 
-      expect(
-          ns64.asUnmodifiableView(),
-          allOf(equals([0x02030405060708, 0x03040506070809]),
-              isA<UnmodifiableUint64ListView>()));
+      expect(ns64.asUnmodifiableView(),
+          equals([0x02030405060708, 0x03040506070809]));
 
       expect(ns64.toHex64(), equals('0002030405060708 0003040506070809'));
       expect(

@@ -1,3 +1,13 @@
+## 1.2.0
+
+- Remove use of `UnmodifiableUint8ListView` for Dart 3.5.0 compatibility.
+
+- sdk: '>=3.4.0 <4.0.0'
+
+- collection: ^1.19.0
+- test: ^1.25.8
+- coverage: ^1.9.0
+
 ## 1.1.0
 
 Dart `3.3.0` compatibility changes:

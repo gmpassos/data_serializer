@@ -144,15 +144,9 @@ void main() {
 
       expect(ns32.copy(), equals([0x01020304, 0x05060708]));
 
-      expect(
-          ns32.copyAsUnmodifiable(),
-          allOf(isA<UnmodifiableUint32ListView>(),
-              equals([0x01020304, 0x05060708])));
+      expect(ns32.copyAsUnmodifiable(), equals([0x01020304, 0x05060708]));
 
-      expect(
-          ns32.asUnmodifiableView(),
-          allOf(isA<UnmodifiableUint32ListView>(),
-              equals([0x01020304, 0x05060708])));
+      expect(ns32.asUnmodifiableView(), equals([0x01020304, 0x05060708]));
 
       expect(ns32.reversedList(), equals([0x05060708, 0x01020304]));
 
