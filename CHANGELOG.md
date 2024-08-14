@@ -1,3 +1,9 @@
+## 1.2.1
+
+- Rollback to `collection 1.18.0` for Flutter SDK compatibility.
+
+- collection: ^1.18.0
+
 ## 1.2.0
 
 - Remove use of `UnmodifiableUint8ListView` for Dart 3.5.0 compatibility.
