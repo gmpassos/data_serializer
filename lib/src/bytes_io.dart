@@ -103,8 +103,11 @@ abstract class BytesIO {
   Uint8List toBytes([int offset = 0, int? length]);
 
   /// Calls the function [output] with the internal bytes of this instance.
-  R bytesTo<R>(R Function(Uint8List bytes, int offset, int length) output,
-      [int offset = 0, int? length]);
+  R bytesTo<R>(
+    R Function(Uint8List bytes, int offset, int length) output, [
+    int offset = 0,
+    int? length,
+  ]);
 
   /// Returns the index of [byte] inf [offset] and [length] range.
   int indexOf(int byte, [int offset = 0, int? length]);

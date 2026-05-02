@@ -15,19 +15,28 @@ class BytesUint8ListIO extends BytesIO {
   int _position = 0;
 
   BytesUint8ListIO([int initialCapacity = 32])
-      : _bytes = Uint8List(initialCapacity) {
+    : _bytes = Uint8List(initialCapacity) {
     bytesData = ByteDataIntCodec(_bytes.asByteData());
   }
 
-  BytesUint8ListIO.from(Uint8List bytes,
-      {int offset = 0, int? length, int? bufferLength, bool copyBuffer = false})
-      : _bytes = _fromUint8List(bytes, offset, length) {
+  BytesUint8ListIO.from(
+    Uint8List bytes, {
+    int offset = 0,
+    int? length,
+    int? bufferLength,
+    bool copyBuffer = false,
+  }) : _bytes = _fromUint8List(bytes, offset, length) {
     _length = bufferLength ?? _bytes.length;
     bytesData = ByteDataIntCodec(_bytes.asByteData());
   }
 
-  static Uint8List _fromUint8List(Uint8List bytes,
-      [int offset = 0, int? length, int? bytesLength, bool copy = false]) {
+  static Uint8List _fromUint8List(
+    Uint8List bytes, [
+    int offset = 0,
+    int? length,
+    int? bytesLength,
+    bool copy = false,
+  ]) {
     length ??= (bytesLength ?? bytes.length) - offset;
 
     if (offset == 0 && length == bytes.length) {
@@ -267,8 +276,11 @@ class BytesUint8ListIO extends BytesIO {
       _fromUint8List(_bytes, offset, length, _length, true);
 
   @override
-  R bytesTo<R>(R Function(Uint8List bytes, int offset, int length) output,
-      [int offset = 0, int? length]) {
+  R bytesTo<R>(
+    R Function(Uint8List bytes, int offset, int length) output, [
+    int offset = 0,
+    int? length,
+  ]) {
     length ??= _length - offset;
 
     return output(_bytes, offset, length);

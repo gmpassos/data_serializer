@@ -239,15 +239,18 @@ extension BytesBufferLeb128Extension on BytesBuffer {
   }
 
   /// Reads a [String] inside a LEB128 bytes block.
-  String readLeb128String(
-      {dart_convert.Encoding encoding = dart_convert.latin1}) {
+  String readLeb128String({
+    dart_convert.Encoding encoding = dart_convert.latin1,
+  }) {
     var block = readLeb128Block();
     return encoding.decode(block);
   }
 
   /// Writes [String] [s] inside a LEB128 bytes block.
-  int writeLeb128String(String s,
-      {dart_convert.Encoding encoding = dart_convert.latin1}) {
+  int writeLeb128String(
+    String s, {
+    dart_convert.Encoding encoding = dart_convert.latin1,
+  }) {
     var bs = encoding.encode(s);
     return writeLeb128Block(bs);
   }
