@@ -712,7 +712,9 @@ extension Uint8ListDataExtension on Uint8List {
   /// Converts this bytes to a [List] of `Uint64`.
   List<int> toListOfUint64() {
     return List<int>.generate(
-        length ~/ 8, (i) => _platform.readUint64(this, i * 8));
+      length ~/ 8,
+      (i) => _platform.readUint64(this, i * 8),
+    );
   }
 
   /// Converts this bytes to a [List] of `Int8`.
@@ -736,7 +738,9 @@ extension Uint8ListDataExtension on Uint8List {
   /// Converts this bytes to a [List] of `Int64`.
   List<int> toListOfInt64() {
     return List<int>.generate(
-        length ~/ 8, (i) => _platform.readInt64(this, i * 8));
+      length ~/ 8,
+      (i) => _platform.readInt64(this, i * 8),
+    );
   }
 
   /// Reads bytes ([Uint8List]) of [length] at [offset].
@@ -784,21 +788,24 @@ extension Uint8ListDataExtension on Uint8List {
 
   /// Reads a list of [Writable] using the [reader] function to instantiate the [W] elements.
   List<W> readWritables<W extends Writable>(
-      W Function(BytesBuffer input) reader) {
+    W Function(BytesBuffer input) reader,
+  ) {
     return toBytesBuffer().readWritables(reader);
   }
 
   /// Instantiates a [BytesBuffer] from this [Uint8List] instance.
-  BytesBuffer toBytesBuffer(
-          {int offset = 0,
-          int? length,
-          int? bufferLength,
-          bool copyBuffer = false}) =>
-      BytesBuffer.from(this,
-          offset: offset,
-          length: length,
-          bufferLength: bufferLength,
-          copyBuffer: copyBuffer);
+  BytesBuffer toBytesBuffer({
+    int offset = 0,
+    int? length,
+    int? bufferLength,
+    bool copyBuffer = false,
+  }) => BytesBuffer.from(
+    this,
+    offset: offset,
+    length: length,
+    bufferLength: bufferLength,
+    copyBuffer: copyBuffer,
+  );
 
   /// Merges `this` instance with [other] using the `AND` logical operator.
   Uint8List operator &(Uint8List other) => merge(other, (a, b, i) => a & b);
@@ -811,7 +818,9 @@ extension Uint8ListDataExtension on Uint8List {
 
   /// Merges `this` instance with [other] using the [merger] [Function] for each byte.
   Uint8List merge(
-      Uint8List other, int Function(int a, int b, int index) merger) {
+    Uint8List other,
+    int Function(int a, int b, int index) merger,
+  ) {
     var length = min(this.length, other.length);
     var out = Uint8List(length);
 
@@ -906,8 +915,9 @@ extension Uint32ListDataExtension on Uint32List {
 
   ByteData _byteDataWithEndian(Endian endian) {
     if (Endian.host == endian) {
-      return Uint8List.fromList(convertToUint8ListHostEndian().reverseChunks(4))
-          .asByteData();
+      return Uint8List.fromList(
+        convertToUint8ListHostEndian().reverseChunks(4),
+      ).asByteData();
     } else {
       return convertToUint8ListReversedEndian().asByteData();
     }
@@ -990,8 +1000,9 @@ extension Uint64ListDataExtension on Uint64List {
 
   ByteData _byteDataWithEndian(Endian endian) {
     if (Endian.host == endian) {
-      return Uint8List.fromList(convertToUint8ListHostEndian().reverseChunks(8))
-          .asByteData();
+      return Uint8List.fromList(
+        convertToUint8ListHostEndian().reverseChunks(8),
+      ).asByteData();
     } else {
       return convertToUint8ListReversedEndian().asByteData();
     }
@@ -1021,8 +1032,9 @@ extension ByteDataExtension on ByteData {
     }
 
     if (lengthInBytes > length * chunkSize) {
-      var lengthStr =
-          chunkSize == 1 ? '`length:$length`' : '`length:$length * $chunkSize`';
+      var lengthStr = chunkSize == 1
+          ? '`length:$length`'
+          : '`length:$length * $chunkSize`';
       throw RangeError('$lengthStr over buffer length ($lengthInBytes)');
     }
   }

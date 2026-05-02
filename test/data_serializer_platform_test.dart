@@ -1,4 +1,6 @@
 @Tags(['num', 'platform'])
+library;
+
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -84,8 +86,11 @@ void _testNumber(int n, String result) {
   expect(nRead1, equals(n));
   expect(nRead2, equals(n));
 
-  expect(p.isSafeInteger(n), isTrue,
-      reason: 'Not safe number($n) for platform: $p');
+  expect(
+    p.isSafeInteger(n),
+    isTrue,
+    reason: 'Not safe number($n) for platform: $p',
+  );
 
   p.checkSafeInteger(n);
 }
@@ -123,23 +128,33 @@ void main() {
       expect(BigInt.parse('-9999999007199254740991').isSafeInteger, isFalse);
 
       expect(
-          () => p.checkSafeInteger(9007199254740991), isNot(throwsStateError));
+        () => p.checkSafeInteger(9007199254740991),
+        isNot(throwsStateError),
+      );
       expect(
-          () => p.checkSafeInteger(-9007199254740991), isNot(throwsStateError));
+        () => p.checkSafeInteger(-9007199254740991),
+        isNot(throwsStateError),
+      );
 
-      expect(() => p.checkSafeIntegerByBigInt(BigInt.from(9007199254740991)),
-          isNot(throwsStateError));
-      expect(() => p.checkSafeIntegerByBigInt(BigInt.from(-9007199254740991)),
-          isNot(throwsStateError));
+      expect(
+        () => p.checkSafeIntegerByBigInt(BigInt.from(9007199254740991)),
+        isNot(throwsStateError),
+      );
+      expect(
+        () => p.checkSafeIntegerByBigInt(BigInt.from(-9007199254740991)),
+        isNot(throwsStateError),
+      );
 
       expect(
-          () => p
-              .checkSafeIntegerByBigInt(BigInt.parse('9999999007199254740991')),
-          throwsStateError);
+        () =>
+            p.checkSafeIntegerByBigInt(BigInt.parse('9999999007199254740991')),
+        throwsStateError,
+      );
       expect(
-          () => p.checkSafeIntegerByBigInt(
-              BigInt.parse('-9999999007199254740991')),
-          throwsStateError);
+        () =>
+            p.checkSafeIntegerByBigInt(BigInt.parse('-9999999007199254740991')),
+        throwsStateError,
+      );
     });
 
     test('64 bits Limits', () {
@@ -191,14 +206,17 @@ void main() {
       () {
         for (var endian in [Endian.little, Endian.big]) {
           print(
-              '** Testing numbers sequence (${endian == Endian.big ? 'BE' : 'LE'})...');
+            '** Testing numbers sequence (${endian == Endian.big ? 'BE' : 'LE'})...',
+          );
 
           var rand = Random(74818365);
 
           var total = 0;
-          for (var n = 0xAA;
-              n < 0xFFFFFFFFFFFF;
-              n += rand.nextInt(255 * 255 * 256 * 3 * 3)) {
+          for (
+            var n = 0xAA;
+            n < 0xFFFFFFFFFFFF;
+            n += rand.nextInt(255 * 255 * 256 * 3 * 3)
+          ) {
             var bs1 = Uint8List(8);
             var bs2 = Uint8List(8);
 
@@ -220,58 +238,58 @@ void main() {
       //skip: true,
     );
 
-    test(
-      'test sequence 2',
-      () {
-        for (var endian in [Endian.little, Endian.big]) {
-          print(
-              '** Testing numbers sequence (${endian == Endian.big ? 'BE' : 'LE'})...');
+    test('test sequence 2', () {
+      for (var endian in [Endian.little, Endian.big]) {
+        print(
+          '** Testing numbers sequence (${endian == Endian.big ? 'BE' : 'LE'})...',
+        );
 
-          var rand = Random(3847592812);
+        var rand = Random(3847592812);
 
-          var total = 0;
-          for (var n = 0xAA;
-              n < 0xFFFFFFFFFFFF;
-              n += rand.nextInt(255 * 255 * 256 * 3 * 4)) {
-            var bs1a = Uint8List(8);
-            var bs2a = Uint8List(8);
-            var bsh1a = ByteDataIntCodec(bs1a.asByteData());
-            var bsh2a = ByteDataIntCodec(bs2a.asByteData());
+        var total = 0;
+        for (
+          var n = 0xAA;
+          n < 0xFFFFFFFFFFFF;
+          n += rand.nextInt(255 * 255 * 256 * 3 * 4)
+        ) {
+          var bs1a = Uint8List(8);
+          var bs2a = Uint8List(8);
+          var bsh1a = ByteDataIntCodec(bs1a.asByteData());
+          var bsh2a = ByteDataIntCodec(bs2a.asByteData());
 
-            var bs1b = Uint8List(8);
-            var bs2b = Uint8List(8);
-            var bsh1b = bs1b.asByteData();
-            var bsh2b = bs2b.asByteData();
+          var bs1b = Uint8List(8);
+          var bs2b = Uint8List(8);
+          var bsh1b = bs1b.asByteData();
+          var bsh2b = bs2b.asByteData();
 
-            p.setDataTypeHandlerUint64(bsh1a, n, 0, endian);
-            p.setUint64(bsh1b, n, 0, endian);
+          p.setDataTypeHandlerUint64(bsh1a, n, 0, endian);
+          p.setUint64(bsh1b, n, 0, endian);
 
-            p.setDataTypeHandlerInt64(bsh2a, n, 0, endian);
-            p.setInt64(bsh2b, n, 0, endian);
+          p.setDataTypeHandlerInt64(bsh2a, n, 0, endian);
+          p.setInt64(bsh2b, n, 0, endian);
 
-            final endianName = endian.isBigEndian ? 'big' : 'little';
+          final endianName = endian.isBigEndian ? 'big' : 'little';
 
-            expect(bs1a, equals(bs1b), reason: "endian: $endianName");
-            expect(bs2a, equals(bs2b), reason: "endian: $endianName");
+          expect(bs1a, equals(bs1b), reason: "endian: $endianName");
+          expect(bs2a, equals(bs2b), reason: "endian: $endianName");
 
-            var nRead1a = p.getDataTypeHandlerUint64(bsh1a, 0, endian);
-            var nRead1b = p.getUint64(bsh1b, 0, endian);
+          var nRead1a = p.getDataTypeHandlerUint64(bsh1a, 0, endian);
+          var nRead1b = p.getUint64(bsh1b, 0, endian);
 
-            expect(nRead1a, equals(nRead1b), reason: "endian: $endianName");
+          expect(nRead1a, equals(nRead1b), reason: "endian: $endianName");
 
-            var nRead2a = p.getDataTypeHandlerUint64(bsh2a, 0, endian);
-            var nRead2b = p.getUint64(bsh2b, 0, endian);
+          var nRead2a = p.getDataTypeHandlerUint64(bsh2a, 0, endian);
+          var nRead2b = p.getUint64(bsh2b, 0, endian);
 
-            expect(nRead2a, equals(nRead2b), reason: "endian: $endianName");
+          expect(nRead2a, equals(nRead2b), reason: "endian: $endianName");
 
-            expect(nRead1a, equals(n));
-            expect(nRead2a, equals(n));
-            total++;
-          }
-
-          print('-- Tested $total numbers.');
+          expect(nRead1a, equals(n));
+          expect(nRead2a, equals(n));
+          total++;
         }
-      },
-    );
+
+        print('-- Tested $total numbers.');
+      }
+    });
   });
 }

@@ -37,15 +37,18 @@ class BytesFileIO extends BytesIO {
   }
 
   BytesFileIO(RandomAccessFile io, {int? length})
-      : this._(io, length ??= io.lengthSync());
+    : this._(io, length ??= io.lengthSync());
 
   factory BytesFileIO.fromFile(File file, {int? length, bool append = true}) {
     var io = file.openSync(mode: append ? FileMode.append : FileMode.write);
     return BytesFileIO(io, length: length);
   }
 
-  static Future<BytesFileIO> fromFileAsync(File file,
-      {int? length, bool append = true}) async {
+  static Future<BytesFileIO> fromFileAsync(
+    File file, {
+    int? length,
+    bool append = true,
+  }) async {
     var io = await file.open(mode: append ? FileMode.append : FileMode.write);
     return BytesFileIO(io, length: length);
   }
@@ -383,8 +386,11 @@ class BytesFileIO extends BytesIO {
       toBytes(offset, length);
 
   @override
-  R bytesTo<R>(R Function(Uint8List bytes, int offset, int length) output,
-      [int offset = 0, int? length]) {
+  R bytesTo<R>(
+    R Function(Uint8List bytes, int offset, int length) output, [
+    int offset = 0,
+    int? length,
+  ]) {
     length ??= _length - offset;
 
     var bs = toBytes(offset, length);
@@ -406,9 +412,7 @@ class FileDataIntCodec extends IntCodec {
 
   late final ByteData _bufferByteData;
 
-  FileDataIntCodec(this._fileIO)
-      : _io = _fileIO._io,
-        _buffer = Uint8List(8) {
+  FileDataIntCodec(this._fileIO) : _io = _fileIO._io, _buffer = Uint8List(8) {
     _bufferByteData = _buffer.asByteData();
   }
 

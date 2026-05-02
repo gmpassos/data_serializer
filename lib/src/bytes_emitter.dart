@@ -147,16 +147,16 @@ class BytesEmitter {
 
   /// The length of bytes to [output].
   int get length => _data.map((e) {
-        if (e is Uint8List) {
-          return e.length;
-        } else if (e is BytesEmitter) {
-          return e.length;
-        } else if (e is int) {
-          return 1;
-        } else {
-          throw StateError("Can't handle type: $e");
-        }
-      }).sum;
+    if (e is Uint8List) {
+      return e.length;
+    } else if (e is BytesEmitter) {
+      return e.length;
+    } else if (e is int) {
+      return 1;
+    } else {
+      throw StateError("Can't handle type: $e");
+    }
+  }).sum;
 
   /// Outputs/emits all the written bytes.
   Uint8List output() {

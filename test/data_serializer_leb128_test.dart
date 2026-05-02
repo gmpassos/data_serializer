@@ -145,9 +145,9 @@ void main() {
       expect(bs.toBytes(), equals([192, 132, 61, 192, 251, 66]));
 
       expect(
-          bs.toBytes(),
-          equals(
-              Leb128.encodeUnsigned(1000000) + Leb128.encodeSigned(-1000000)));
+        bs.toBytes(),
+        equals(Leb128.encodeUnsigned(1000000) + Leb128.encodeSigned(-1000000)),
+      );
 
       expect(bs.position, equals(bs.length));
       expect(bs.position, equals(bs.toBytes().length));
@@ -174,59 +174,60 @@ void main() {
       bs.writeLeb128String("Foooooooooooooooooooooooooooooo");
 
       expect(
-          bs.toBytes(),
-          equals([
-            192,
-            132,
-            61,
-            192,
-            251,
-            66,
-            11,
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            0,
-            31,
-            70,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-            111,
-          ]));
+        bs.toBytes(),
+        equals([
+          192,
+          132,
+          61,
+          192,
+          251,
+          66,
+          11,
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          31,
+          70,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+          111,
+        ]),
+      );
 
       expect(bs.position, equals(bs.toBytes().length));
 
@@ -249,8 +250,10 @@ void main() {
 
       expect(bs.length, equals(1 + 10 + 1 + 3));
 
-      expect(bs.toBytes(),
-          equals([10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 3, 10, 20, 30]));
+      expect(
+        bs.toBytes(),
+        equals([10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 3, 10, 20, 30]),
+      );
 
       bs.seek(0);
 
@@ -274,8 +277,10 @@ void main() {
 
       expect(bs.length, equals(1 + 10 + 1 + 3));
 
-      expect(bs.toBytes(),
-          equals([10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 3, 10, 20, 30]));
+      expect(
+        bs.toBytes(),
+        equals([10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 3, 10, 20, 30]),
+      );
 
       bs.seek(0);
 

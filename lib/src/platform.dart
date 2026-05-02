@@ -76,20 +76,36 @@ abstract class DataSerializerPlatform {
   }
 
   /// Sets [data] bytes from [offset] with [n] as `Uint64` in [endian] order.
-  void setUint64(ByteData data, int n,
-      [int offset = 0, Endian endian = Endian.big]);
+  void setUint64(
+    ByteData data,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]);
 
   /// Sets [data] bytes from [offset] with [n] as `Int64` in [endian] order.
-  void setInt64(ByteData data, int n,
-      [int offset = 0, Endian endian = Endian.big]);
+  void setInt64(
+    ByteData data,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]);
 
   /// Sets [data] bytes from [offset] with [n] as `Uint64` in [endian] order.
-  void setDataTypeHandlerUint64(IntCodec data, int n,
-      [int offset = 0, Endian endian = Endian.big]);
+  void setDataTypeHandlerUint64(
+    IntCodec data,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]);
 
   /// Sets [data] bytes from [offset] with [n] as `Int64` in [endian] order.
-  void setDataTypeHandlerInt64(IntCodec data, int n,
-      [int offset = 0, Endian endian = Endian.big]);
+  void setDataTypeHandlerInt64(
+    IntCodec data,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]);
 
   /// Gets a `Uint64` from [data] at [offset] in [endian] order.
   int getUint64(ByteData data, [int offset = 0, Endian endian = Endian.big]);
@@ -98,20 +114,34 @@ abstract class DataSerializerPlatform {
   int getInt64(ByteData data, [int offset = 0, Endian endian = Endian.big]);
 
   /// Gets a `Uint64` from [data] at [offset] in [endian] order.
-  int getDataTypeHandlerUint64(IntCodec data,
-      [int offset = 0, Endian endian = Endian.big]);
+  int getDataTypeHandlerUint64(
+    IntCodec data, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]);
 
   /// Gets a `Int64` from [data] at [offset] in [endian] order.
-  int getDataTypeHandlerInt64(IntCodec data,
-      [int offset = 0, Endian endian = Endian.big]);
+  int getDataTypeHandlerInt64(
+    IntCodec data, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]);
 
   /// Writes [n] as `Uint64` to [out] at [offset] in [endian] order.
-  void writeUint64(Uint8List out, int n,
-      [int offset = 0, Endian endian = Endian.big]);
+  void writeUint64(
+    Uint8List out,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]);
 
   /// Writes [n] as `Int64` to [out] at [offset] in [endian] order.
-  void writeInt64(Uint8List out, int n,
-      [int offset = 0, Endian endian = Endian.big]);
+  void writeInt64(
+    Uint8List out,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]);
 
   /// Reads a `Uint64` from [out] at [offset] in [endian] order.
   int readUint64(Uint8List out, [int offset = 0, Endian endian = Endian.big]);

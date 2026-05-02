@@ -72,8 +72,9 @@ void main() {
 
       expect(o, equals(FooWritable(101, 'FOO')));
 
-      var list =
-          buffer.readWritables((input) => FooWritable.deserialize(input));
+      var list = buffer.readWritables(
+        (input) => FooWritable.deserialize(input),
+      );
 
       expect(list.length, equals(3));
 
@@ -81,8 +82,9 @@ void main() {
       expect(list[1], equals(FooWritable(11, 'Bar')));
       expect(list[2], equals(FooWritable(12, 'Baz')));
 
-      var list2 =
-          buffer.readWritables((input) => FooWritable.deserialize(input));
+      var list2 = buffer.readWritables(
+        (input) => FooWritable.deserialize(input),
+      );
 
       expect(list2.length, equals(2));
 
@@ -109,8 +111,10 @@ void main() {
 
       expect(o, equals(FooWritable(101, 'FOO')));
 
-      var list = buffer.readWritables((input) => FooWritable.deserialize(input),
-          leb128: true);
+      var list = buffer.readWritables(
+        (input) => FooWritable.deserialize(input),
+        leb128: true,
+      );
 
       expect(list.length, equals(3));
 
@@ -118,8 +122,9 @@ void main() {
       expect(list[1], equals(FooWritable(11, 'Bar')));
       expect(list[2], equals(FooWritable(12, 'Baz')));
 
-      var list2 =
-          buffer.readWritables((input) => FooWritable.deserialize(input));
+      var list2 = buffer.readWritables(
+        (input) => FooWritable.deserialize(input),
+      );
 
       expect(list2.length, equals(2));
 
@@ -128,15 +133,13 @@ void main() {
     });
 
     test('writeWritable/readWritable', () {
-      var list = [
-        FooWritable(10, 'Foo'),
-        FooWritable(11, 'Bar'),
-      ];
+      var list = [FooWritable(10, 'Foo'), FooWritable(11, 'Bar')];
 
       var serial = list.serialize();
 
-      var list2 =
-          serial.readWritables((input) => FooWritable.deserialize(input));
+      var list2 = serial.readWritables(
+        (input) => FooWritable.deserialize(input),
+      );
 
       expect(list2, equals(list));
     });

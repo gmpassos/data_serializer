@@ -11,11 +11,13 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
 
   static final int _minSafeInt = -9007199254740991;
 
-  static final Uint8List _maxSafeIntBytes =
-      '001FFFFFFFFFFFFF'.decodeHex().asUnmodifiableView();
+  static final Uint8List _maxSafeIntBytes = '001FFFFFFFFFFFFF'
+      .decodeHex()
+      .asUnmodifiableView();
 
-  static final Uint8List _minSafeIntBytes =
-      'FFE0000000000001'.decodeHex().asUnmodifiableView();
+  static final Uint8List _minSafeIntBytes = 'FFE0000000000001'
+      .decodeHex()
+      .asUnmodifiableView();
 
   @override
   int get maxSafeInt => _maxSafeInt;
@@ -44,27 +46,43 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
   }
 
   @override
-  void setUint64(ByteData data, int n,
-          [int offset = 0, Endian endian = Endian.big]) =>
-      setInt64(data, n, offset, endian);
+  void setUint64(
+    ByteData data,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]) => setInt64(data, n, offset, endian);
 
   @override
-  void setDataTypeHandlerUint64(IntCodec data, int n,
-          [int offset = 0, Endian endian = Endian.big]) =>
-      setDataTypeHandlerInt64(data, n, offset, endian);
+  void setDataTypeHandlerUint64(
+    IntCodec data,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]) => setDataTypeHandlerInt64(data, n, offset, endian);
 
   @override
-  void setInt64(ByteData data, int n,
-          [int offset = 0, Endian endian = Endian.big]) =>
-      _writeInt64(n, offset, endian, data.setUint32);
+  void setInt64(
+    ByteData data,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]) => _writeInt64(n, offset, endian, data.setUint32);
 
   @override
-  void setDataTypeHandlerInt64(IntCodec data, int n,
-          [int offset = 0, Endian endian = Endian.big]) =>
-      _writeInt64(n, offset, endian, data.setUint32);
+  void setDataTypeHandlerInt64(
+    IntCodec data,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]) => _writeInt64(n, offset, endian, data.setUint32);
 
-  void _writeInt64(int n, int offset, Endian endian,
-      void Function(int byteOffset, int value, Endian endian) setUint32) {
+  void _writeInt64(
+    int n,
+    int offset,
+    Endian endian,
+    void Function(int byteOffset, int value, Endian endian) setUint32,
+  ) {
     if (n.isNegative) {
       if (n >= -0x80000000) {
         if (endian.isBigEndian) {
@@ -92,8 +110,12 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
     }
   }
 
-  void _writeUint64Impl(int n, int offset, Endian endian,
-      void Function(int byteOffset, int value, Endian endian) setUint32) {
+  void _writeUint64Impl(
+    int n,
+    int offset,
+    Endian endian,
+    void Function(int byteOffset, int value, Endian endian) setUint32,
+  ) {
     checkSafeInteger(n);
 
     // Right shift operator (>>) will cast to 32 bits in JS:
@@ -128,24 +150,29 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
       getInt64(data, offset, endian);
 
   @override
-  int getDataTypeHandlerUint64(IntCodec data,
-          [int offset = 0, Endian endian = Endian.big]) =>
-      getDataTypeHandlerInt64(data, offset, endian);
+  int getDataTypeHandlerUint64(
+    IntCodec data, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]) => getDataTypeHandlerInt64(data, offset, endian);
 
   @override
   int getInt64(ByteData data, [int offset = 0, Endian endian = Endian.big]) =>
       _readInt64(offset, endian, data.getUint32, data.getInt32);
 
   @override
-  int getDataTypeHandlerInt64(IntCodec data,
-          [int offset = 0, Endian endian = Endian.big]) =>
-      _readInt64(offset, endian, data.getUint32, data.getInt32);
+  int getDataTypeHandlerInt64(
+    IntCodec data, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]) => _readInt64(offset, endian, data.getUint32, data.getInt32);
 
   int _readInt64(
-      int offset,
-      Endian endian,
-      int Function(int offset, Endian endian) getUint32,
-      int Function(int offset, Endian endian) getInt32) {
+    int offset,
+    Endian endian,
+    int Function(int offset, Endian endian) getUint32,
+    int Function(int offset, Endian endian) getInt32,
+  ) {
     int offsetN1, offsetN2;
 
     if (endian == Endian.big) {
@@ -186,14 +213,20 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
   }
 
   @override
-  void writeUint64(Uint8List out, int n,
-          [int offset = 0, Endian endian = Endian.big]) =>
-      setInt64(out.asByteData(), n, offset, endian);
+  void writeUint64(
+    Uint8List out,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]) => setInt64(out.asByteData(), n, offset, endian);
 
   @override
-  void writeInt64(Uint8List out, int n,
-          [int offset = 0, Endian endian = Endian.big]) =>
-      setInt64(out.asByteData(), n, offset, endian);
+  void writeInt64(
+    Uint8List out,
+    int n, [
+    int offset = 0,
+    Endian endian = Endian.big,
+  ]) => setInt64(out.asByteData(), n, offset, endian);
 
   @override
   int readUint64(Uint8List out, [int offset = 0, Endian endian = Endian.big]) =>
