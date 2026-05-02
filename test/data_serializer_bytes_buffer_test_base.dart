@@ -7,9 +7,10 @@ import 'package:test/test.dart';
 enum FooEnum { a, b, c }
 
 void doBytesBufferTests(
-    BytesBuffer Function([int? capacity]) createBsBuff,
-    BytesBuffer Function(Uint8List bytes, int offset, int? length)
-        createBsBuffFrom) {
+  BytesBuffer Function([int? capacity]) createBsBuff,
+  BytesBuffer Function(Uint8List bytes, int offset, int? length)
+  createBsBuffFrom,
+) {
   testBytesBasic(int bsCapacity) {
     var buffer = createBsBuff(bsCapacity);
 
@@ -33,9 +34,11 @@ void doBytesBufferTests(
     expect(buffer.length, equals(1 + 4));
     expect(buffer.position, equals(1 + 4));
     expect(
-        buffer.capacity,
-        equals(math.max(
-            (bsCapacity > 1 + 4 ? bsCapacity : bsCapacity * 2), 1 + 4)));
+      buffer.capacity,
+      equals(
+        math.max((bsCapacity > 1 + 4 ? bsCapacity : bsCapacity * 2), 1 + 4),
+      ),
+    );
 
     buffer.seek(1);
     expect(buffer.writeInt32(0x04030201), equals(4));
@@ -43,22 +46,31 @@ void doBytesBufferTests(
     expect(buffer.length, equals(1 + 4));
     expect(buffer.position, equals(1 + 4));
     expect(
-        buffer.capacity,
-        equals(math.max(
-            (bsCapacity > 1 + 4 ? bsCapacity : bsCapacity * 2), 1 + 4)));
+      buffer.capacity,
+      equals(
+        math.max((bsCapacity > 1 + 4 ? bsCapacity : bsCapacity * 2), 1 + 4),
+      ),
+    );
 
     expect(buffer.asUint8List(1), equals([4, 3, 2, 1]));
     expect(buffer.asUint8List(1, 2), equals([4, 3]));
 
     expect(buffer.writeUint64(0x08070605040302), equals(8));
-    expect(buffer.asUint8List(),
-        equals([123, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2]));
+    expect(
+      buffer.asUint8List(),
+      equals([123, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2]),
+    );
     expect(buffer.length, equals(1 + 4 + 8));
     expect(buffer.position, equals(1 + 4 + 8));
     expect(
-        buffer.capacity,
-        equals(math.max((bsCapacity > 1 + 4 + 8 ? bsCapacity : bsCapacity * 2),
-            1 + 4 + 8)));
+      buffer.capacity,
+      equals(
+        math.max(
+          (bsCapacity > 1 + 4 + 8 ? bsCapacity : bsCapacity * 2),
+          1 + 4 + 8,
+        ),
+      ),
+    );
 
     expect(buffer.indexOf(123), equals(0));
     expect(buffer.indexOf(3), equals(2));
@@ -67,9 +79,9 @@ void doBytesBufferTests(
 
     expect(buffer.writeUint64(0x02030405060708), equals(8));
     expect(
-        buffer.asUint8List(),
-        equals(
-            [123, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2, 0, 2, 3, 4, 5, 6, 7, 8]));
+      buffer.asUint8List(),
+      equals([123, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2, 0, 2, 3, 4, 5, 6, 7, 8]),
+    );
     expect(buffer.length, equals(1 + 4 + 8 + 8));
     expect(buffer.position, equals(1 + 4 + 8 + 8));
     expect(buffer.capacity, greaterThan(1 + 4 + 8 + 8));
@@ -183,7 +195,9 @@ void doBytesBufferTests(
     expect(buffer.isClosed, buffer.bytesIO.supportsClosing ? isTrue : isFalse);
 
     expect(
-        buffer2.isClosed, buffer2.bytesIO.supportsClosing ? isTrue : isFalse);
+      buffer2.isClosed,
+      buffer2.bytesIO.supportsClosing ? isTrue : isFalse,
+    );
   }
 
   test('basic 0', () => testBytesBasic(0));
@@ -213,34 +227,62 @@ void doBytesBufferTests(
     expect(bsIO.capacity, equals(math.max(initialCapacity, 2)));
   }
 
-  test('capacity/length BytesUint8ListIO(0)',
-      () => testBytesIO(BytesUint8ListIO(0)));
-  test('capacity/length BytesUint8ListIO(1)',
-      () => testBytesIO(BytesUint8ListIO(1)));
-  test('capacity/length BytesUint8ListIO(2)',
-      () => testBytesIO(BytesUint8ListIO(2)));
-  test('capacity/length BytesUint8ListIO(3)',
-      () => testBytesIO(BytesUint8ListIO(3)));
-  test('capacity/length BytesUint8ListIO(4)',
-      () => testBytesIO(BytesUint8ListIO(4)));
-  test('capacity/length BytesUint8ListIO(5)',
-      () => testBytesIO(BytesUint8ListIO(5)));
-  test('capacity/length BytesUint8ListIO(6)',
-      () => testBytesIO(BytesUint8ListIO(6)));
-  test('capacity/length BytesUint8ListIO(7)',
-      () => testBytesIO(BytesUint8ListIO(7)));
-  test('capacity/length BytesUint8ListIO(8)',
-      () => testBytesIO(BytesUint8ListIO(8)));
-  test('capacity/length BytesUint8ListIO(11)',
-      () => testBytesIO(BytesUint8ListIO(11)));
-  test('capacity/length BytesUint8ListIO(16)',
-      () => testBytesIO(BytesUint8ListIO(16)));
-  test('capacity/length BytesUint8ListIO(17)',
-      () => testBytesIO(BytesUint8ListIO(17)));
-  test('capacity/length BytesUint8ListIO(32)',
-      () => testBytesIO(BytesUint8ListIO(32)));
-  test('capacity/length BytesUint8ListIO(33)',
-      () => testBytesIO(BytesUint8ListIO(33)));
+  test(
+    'capacity/length BytesUint8ListIO(0)',
+    () => testBytesIO(BytesUint8ListIO(0)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(1)',
+    () => testBytesIO(BytesUint8ListIO(1)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(2)',
+    () => testBytesIO(BytesUint8ListIO(2)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(3)',
+    () => testBytesIO(BytesUint8ListIO(3)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(4)',
+    () => testBytesIO(BytesUint8ListIO(4)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(5)',
+    () => testBytesIO(BytesUint8ListIO(5)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(6)',
+    () => testBytesIO(BytesUint8ListIO(6)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(7)',
+    () => testBytesIO(BytesUint8ListIO(7)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(8)',
+    () => testBytesIO(BytesUint8ListIO(8)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(11)',
+    () => testBytesIO(BytesUint8ListIO(11)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(16)',
+    () => testBytesIO(BytesUint8ListIO(16)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(17)',
+    () => testBytesIO(BytesUint8ListIO(17)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(32)',
+    () => testBytesIO(BytesUint8ListIO(32)),
+  );
+  test(
+    'capacity/length BytesUint8ListIO(33)',
+    () => testBytesIO(BytesUint8ListIO(33)),
+  );
 
   test('writeBoolean/readBoolean/readUint16/readUint32', () {
     var buffer = createBsBuff(16);
@@ -356,8 +398,10 @@ void doBytesBufferTests(
     expect(buffer.length, equals(8));
     expect(buffer.position, equals(8));
 
-    expect(buffer.asUint8List(),
-        equals(DataSerializerPlatform.instance.maxSafeIntBytes));
+    expect(
+      buffer.asUint8List(),
+      equals(DataSerializerPlatform.instance.maxSafeIntBytes),
+    );
 
     buffer.seek(0);
 
@@ -375,19 +419,30 @@ void doBytesBufferTests(
     expect(buffer.toBytes(0, 2), equals([b0, b1]));
     expect(buffer.toBytes(1, 2), equals([b1, 255]));
 
-    buffer.bytesTo((bytes, offset, length) {
-      expect(
+    buffer.bytesTo(
+      (bytes, offset, length) {
+        expect(
+          bytes.sublist(offset, offset + length),
+          equals(((maxSafeInt ~/ 0xFFFFFFFF - 1) & 0xFFFFFFFF).toUint8List32()),
+        );
+      },
+      0,
+      4,
+    );
+
+    buffer.bytesTo(
+      (bytes, offset, length) {
+        expect(
           bytes.sublist(offset, offset + length),
           equals(
-              ((maxSafeInt ~/ 0xFFFFFFFF - 1) & 0xFFFFFFFF).toUint8List32()));
-    }, 0, 4);
-
-    buffer.bytesTo((bytes, offset, length) {
-      expect(
-          bytes.sublist(offset, offset + length),
-          equals(((maxSafeInt ~/ 0xFFFFFFFF - 1) << 8 & 0xFFFFFFFF | 0xFF)
-              .toUint8List32()));
-    }, 1, 4);
+            ((maxSafeInt ~/ 0xFFFFFFFF - 1) << 8 & 0xFFFFFFFF | 0xFF)
+                .toUint8List32(),
+          ),
+        );
+      },
+      1,
+      4,
+    );
   });
 
   test('writeUint64/readUint64/readUint32 -', () {
@@ -410,19 +465,33 @@ void doBytesBufferTests(
 
     buffer.seek(0);
 
-    expect(buffer.readUint32().toUint8List32(),
-        equals(minSafeIntBytes.sublist(0, 4)));
+    expect(
+      buffer.readUint32().toUint8List32(),
+      equals(minSafeIntBytes.sublist(0, 4)),
+    );
     expect(buffer.readUint32(), equals(minSafeInt & 0xFFFFFFFF));
 
-    buffer.bytesTo((bytes, offset, length) {
-      expect(bytes.sublist(offset, offset + length),
-          equals(minSafeIntBytes.sublist(0, 4)));
-    }, 0, 4);
+    buffer.bytesTo(
+      (bytes, offset, length) {
+        expect(
+          bytes.sublist(offset, offset + length),
+          equals(minSafeIntBytes.sublist(0, 4)),
+        );
+      },
+      0,
+      4,
+    );
 
-    buffer.bytesTo((bytes, offset, length) {
-      expect(bytes.sublist(offset, offset + length),
-          equals(minSafeIntBytes.sublist(1, 5)));
-    }, 1, 4);
+    buffer.bytesTo(
+      (bytes, offset, length) {
+        expect(
+          bytes.sublist(offset, offset + length),
+          equals(minSafeIntBytes.sublist(1, 5)),
+        );
+      },
+      1,
+      4,
+    );
   });
 
   test('writeUint64/readUint64/readUint32', () {
@@ -489,15 +558,18 @@ void doBytesBufferTests(
 
     buffer.writeBigInt(BigInt.from(1234567));
     buffer.writeBigInt(
-        BigInt.parse('123456789101112131415161718192021222324252627282930'));
+      BigInt.parse('123456789101112131415161718192021222324252627282930'),
+    );
 
     buffer.seek(0);
 
     expect(buffer.readBigInt(), equals(BigInt.from(1234567)));
     expect(
-        buffer.readBigInt(),
-        equals(BigInt.parse(
-            '123456789101112131415161718192021222324252627282930')));
+      buffer.readBigInt(),
+      equals(
+        BigInt.parse('123456789101112131415161718192021222324252627282930'),
+      ),
+    );
 
     expect(() => buffer.readBigInt(), throwsA(isA<BytesBufferEOF>()));
 
@@ -566,41 +638,42 @@ void doBytesBufferTests(
     var bs = buffer.toBytes();
     print(bs);
     expect(
-        bs,
-        equals([
-          64,
-          94,
-          221,
-          47,
-          26,
-          159,
-          190,
-          119,
-          64,
-          36,
-          56,
-          81,
-          235,
-          133,
-          30,
-          184,
-          64,
-          52,
-          56,
-          81,
-          235,
-          133,
-          30,
-          184,
-          64,
-          62,
-          84,
-          122,
-          225,
-          71,
-          174,
-          20
-        ]));
+      bs,
+      equals([
+        64,
+        94,
+        221,
+        47,
+        26,
+        159,
+        190,
+        119,
+        64,
+        36,
+        56,
+        81,
+        235,
+        133,
+        30,
+        184,
+        64,
+        52,
+        56,
+        81,
+        235,
+        133,
+        30,
+        184,
+        64,
+        62,
+        84,
+        122,
+        225,
+        71,
+        174,
+        20,
+      ]),
+    );
   });
 
   test('writeFloat32/writeAllFloat32', () {
@@ -628,24 +701,182 @@ void doBytesBufferTests(
     var bs = buffer.toBytes();
     print(bs);
     expect(
-        bs,
-        equals([
-          66,
-          246,
-          233,
-          121,
-          65,
-          33,
-          194,
-          143,
-          65,
-          161,
-          194,
-          143,
-          65,
-          242,
-          163,
-          215
-        ]));
+      bs,
+      equals([
+        66,
+        246,
+        233,
+        121,
+        65,
+        33,
+        194,
+        143,
+        65,
+        161,
+        194,
+        143,
+        65,
+        242,
+        163,
+        215,
+      ]),
+    );
+  });
+
+  group('BytesBuffer.writeNullable / readNullable', () {
+    test('should write and read null value', () {
+      final buffer = BytesBuffer();
+
+      final written = buffer.writeNullable<String>(
+        null,
+        (b, s) => b.writeLeb128String(s),
+      );
+
+      expect(written, isFalse);
+      expect(buffer.length, 1); // only presence boolean
+
+      buffer.seek(0);
+
+      final value = buffer.readNullable<String>((b) => b.readLeb128String());
+
+      expect(value, isNull);
+      expect(buffer.remaining, 0);
+    });
+
+    test('should write and read non-null value', () {
+      final buffer = BytesBuffer();
+
+      final written = buffer.writeNullable<String>(
+        'hello',
+        (b, s) => b.writeLeb128String(s),
+      );
+
+      expect(written, isTrue);
+
+      buffer.seek(0);
+
+      final value = buffer.readNullable<String>((b) => b.readLeb128String());
+
+      expect(value, equals('hello'));
+      expect(buffer.remaining, 0);
+    });
+
+    test('should support custom object serialization', () {
+      final buffer = BytesBuffer();
+
+      final input = DateTime.utc(2025, 4, 20, 10, 30, 15);
+
+      buffer.writeNullable<DateTime>(input, (b, d) => b.writeDateTime(d));
+
+      buffer.seek(0);
+
+      final output = buffer.readNullable<DateTime>((b) => b.readDateTime());
+
+      expect(output, equals(input));
+    });
+
+    test('should preserve sequential nullable values', () {
+      final buffer = BytesBuffer();
+
+      buffer.writeNullable<String>('a', (b, s) => b.writeLeb128String(s));
+      buffer.writeNullable<String>(null, (b, s) => b.writeLeb128String(s));
+      buffer.writeNullable<String>('c', (b, s) => b.writeLeb128String(s));
+
+      buffer.seek(0);
+
+      expect(
+        buffer.readNullable<String>((b) => b.readLeb128String()),
+        equals('a'),
+      );
+      expect(buffer.readNullable<String>((b) => b.readLeb128String()), isNull);
+      expect(
+        buffer.readNullable<String>((b) => b.readLeb128String()),
+        equals('c'),
+      );
+      expect(buffer.remaining, 0);
+    });
+  });
+
+  group('BytesBuffer.writeJSON / readJSON', () {
+    test('should write and read map json', () {
+      final buffer = BytesBuffer();
+
+      final input = {'name': 'John', 'age': 30, 'active': true, 'score': 9.5};
+
+      final writtenSize = buffer.writeJSON(input);
+
+      expect(writtenSize, greaterThan(0));
+
+      buffer.seek(0);
+
+      final output = buffer.readJSON();
+
+      expect(output, equals(input));
+      expect(buffer.remaining, 0);
+    });
+
+    test('should write and read list json', () {
+      final buffer = BytesBuffer();
+
+      final input = [1, 2, 3, 'abc', false, null];
+
+      buffer.writeJSON(input);
+
+      buffer.seek(0);
+
+      final output = buffer.readJSON();
+
+      expect(output, equals(input));
+    });
+
+    test('should write and read primitive json values', () {
+      final values = ['hello', 123, 45.67, true, false, null];
+
+      for (final input in values) {
+        final buffer = BytesBuffer();
+
+        buffer.writeJSON(input);
+        buffer.seek(0);
+
+        final output = buffer.readJSON();
+
+        expect(output, equals(input));
+      }
+    });
+
+    test('should preserve sequential json values', () {
+      final buffer = BytesBuffer();
+
+      buffer.writeJSON({'a': 1});
+      buffer.writeJSON([1, 2, 3]);
+      buffer.writeJSON('done');
+
+      buffer.seek(0);
+
+      expect(buffer.readJSON(), equals({'a': 1}));
+      expect(buffer.readJSON(), equals([1, 2, 3]));
+      expect(buffer.readJSON(), equals('done'));
+      expect(buffer.remaining, 0);
+    });
+
+    test('should produce identical result as direct json encode/decode', () {
+      final buffer = BytesBuffer();
+
+      final input = {
+        'user': {
+          'id': 10,
+          'roles': ['admin', 'editor'],
+        },
+        'enabled': true,
+        'value': null,
+      };
+
+      buffer.writeJSON(input);
+      buffer.seek(0);
+
+      final decoded = buffer.readJSON();
+
+      expect(decoded, equals(input));
+    });
   });
 }

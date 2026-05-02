@@ -14,15 +14,21 @@ class BytesBuffer {
   BytesBuffer.fromIO(this.bytesIO);
 
   BytesBuffer([int initialCapacity = 32])
-      : bytesIO = BytesUint8ListIO(initialCapacity);
+    : bytesIO = BytesUint8ListIO(initialCapacity);
 
-  BytesBuffer.from(Uint8List bytes,
-      {int offset = 0, int? length, int? bufferLength, bool copyBuffer = false})
-      : bytesIO = BytesUint8ListIO.from(bytes,
-            offset: offset,
-            length: length,
-            bufferLength: bufferLength,
-            copyBuffer: copyBuffer);
+  BytesBuffer.from(
+    Uint8List bytes, {
+    int offset = 0,
+    int? length,
+    int? bufferLength,
+    bool copyBuffer = false,
+  }) : bytesIO = BytesUint8ListIO.from(
+         bytes,
+         offset: offset,
+         length: length,
+         bufferLength: bufferLength,
+         copyBuffer: copyBuffer,
+       );
 
   /// Returns the size of the internal bytes buffer ([Uint8List]).
   int get capacity => bytesIO.capacity;
@@ -84,6 +90,74 @@ class BytesBuffer {
   E readEnum<E extends Enum>(List<E> enumValues) {
     var idx = readByte();
     return enumValues[idx];
+  }
+
+  /// Writes a nullable object to the buffer using the provided [writer].
+  ///
+  /// A leading boolean flag is written first:
+  /// - `false` when [object] is `null`
+  /// - `true` when [object] is non-null, followed by the serialized object data
+  ///
+  /// Returns `true` if a non-null object was written, otherwise `false`.
+  ///
+  /// Example:
+  /// ```dart
+  /// buffer.writeNullable<String>('abc', (b, s) => b.writeLeb128String(s));
+  /// ```
+  bool writeNullable<O extends Object>(
+    O? object,
+    void Function(BytesBuffer, O) writer,
+  ) {
+    if (object == null) {
+      writeBoolean(false);
+      return false;
+    }
+
+    writeBoolean(true);
+    writer(this, object);
+    return true;
+  }
+
+  /// Reads a nullable object previously written by [writeNullable].
+  ///
+  /// This first reads the leading presence boolean:
+  /// - `false` returns `null`
+  /// - `true` invokes [reader] to deserialize and return the object
+  ///
+  /// Example:
+  /// ```dart
+  /// var value = buffer.readNullable<String>((b) => b.readLeb128String());
+  /// ```
+  O? readNullable<O extends Object>(O Function(BytesBuffer) reader) {
+    var b = readBoolean();
+    if (!b) return null;
+
+    return reader(this);
+  }
+
+  /// Encodes [j] as a JSON string and writes it using [writeLeb128String].
+  ///
+  /// Returns the number of bytes written.
+  ///
+  /// Supported values are those accepted by `dart:convert` JSON encoding,
+  /// such as [Map], [List], [String], [num], [bool], and `null`.
+  int writeJSON(Object? j) {
+    var jsonEncoded = json.encode(j);
+    return writeLeb128String(jsonEncoded);
+  }
+
+  /// Reads a JSON string written by [writeJSON] and decodes it.
+  ///
+  /// The returned value is dynamic and may be:
+  /// - `Map<String, dynamic>`
+  /// - `List<dynamic>`
+  /// - `String`
+  /// - `num`
+  /// - `bool`
+  /// - `null`
+  dynamic readJSON() {
+    var jsonEncoded = readLeb128String();
+    return json.decode(jsonEncoded);
   }
 
   /// Writes all the `int` at [list] as bytes.
@@ -154,8 +228,8 @@ class BytesBuffer {
     var blocksSz = blocks.isEmpty
         ? 0
         : blocks
-            .map((e) => e.length)
-            .reduce((value, element) => value + 4 + element);
+              .map((e) => e.length)
+              .reduce((value, element) => value + 4 + element);
 
     final writeSz = 4 + 4 + blocksSz;
     bytesIO.ensureCapacity(bytesIO.position + writeSz);
@@ -201,8 +275,9 @@ class BytesBuffer {
   /// Reads a list of [Writable] using the [reader] function to instantiate the [W] elements.
   /// - If [leb128] is `true` will use [readLeb128UnsignedInt] to read the size of the list.
   List<W> readWritables<W extends Writable>(
-      W Function(BytesBuffer input) reader,
-      {bool leb128 = false}) {
+    W Function(BytesBuffer input) reader, {
+    bool leb128 = false,
+  }) {
     int sz;
     if (leb128) {
       sz = readLeb128UnsignedInt();
@@ -495,9 +570,11 @@ class BytesBuffer {
       bytesIO.toBytes(offset, length);
 
   /// Calls the function [output] with the internal bytes of this instance.
-  R bytesTo<R>(R Function(Uint8List bytes, int offset, int length) output,
-          [int offset = 0, int? length]) =>
-      bytesIO.bytesTo(output, offset, length);
+  R bytesTo<R>(
+    R Function(Uint8List bytes, int offset, int length) output, [
+    int offset = 0,
+    int? length,
+  ]) => bytesIO.bytesTo(output, offset, length);
 
   /// Returns the index of [byte] inf [offset] and [length] range.
   int indexOf(int byte, [int offset = 0, int? length]) =>

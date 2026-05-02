@@ -1,3 +1,29 @@
+## 1.2.2
+
+- CI:
+  - `.github/workflows/dart.yml`: updated GitHub Actions `actions/checkout` from v3 to v6 and `codecov/codecov-action` from v3 to v6.
+
+- `BytesBuffer`:
+  - Added `writeNullable` and `readNullable` methods to write/read nullable objects with a presence boolean flag.
+  - Added `writeJSON` and `readJSON` methods to serialize/deserialize JSON-encodable objects as strings.
+  - Reformatted constructor parameter formatting for consistency.
+  - Minor formatting and whitespace fixes.
+
+- Tests (`data_serializer_bytes_buffer_test_base.dart`):
+  - Improved formatting and style consistency.
+  - Added comprehensive tests for `writeNullable` / `readNullable` covering null, non-null, custom objects, and sequential values.
+  - Added comprehensive tests for `writeJSON` / `readJSON` covering maps, lists, primitives, sequential values, and equivalence to direct JSON encode/decode.
+  - Added more explicit expectations and improved test readability.
+
+- `pubspec.yaml`:
+  - Updated Dart SDK constraint to `>=3.10.0 <4.0.0`.
+  - Updated dependencies:
+    - `collection` to `^1.19.1`
+    - `lints` to `^5.1.1`
+    - `test` to `^1.31.1`
+    - `coverage` to `^1.15.0`
+    - `path` to `^1.9.1`
+
 ## 1.2.1
 
 - Rollback to `collection 1.18.0` for Flutter SDK compatibility.
