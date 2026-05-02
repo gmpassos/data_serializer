@@ -1,5 +1,5 @@
 /// Library to handle data serialization/deserialization efficiently.
-library data_serializer;
+library;
 
 export 'src/bits_buffer.dart';
 export 'src/bytes_buffer.dart';

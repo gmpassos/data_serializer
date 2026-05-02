@@ -1,5 +1,7 @@
 @TestOn('vm')
 @Tags(['bytes', 'file'])
+library;
+
 import 'package:data_serializer/data_serializer.dart';
 import 'package:data_serializer/src/bytes_io_file.dart';
 import 'package:test/test.dart';

@@ -18,8 +18,10 @@ void doBytesIOTests(BytesIO bsIO) {
   expect(bsIO.capacity, equals(math.max(initialCapacity, 1)));
 
   expect(bsIO.toBytes(), equals([1]));
-  expect(bsIO.bytesTo((bs, off, lng) => bs.sublist(off, off + lng).toString()),
-      equals('[1]'));
+  expect(
+    bsIO.bytesTo((bs, off, lng) => bs.sublist(off, off + lng).toString()),
+    equals('[1]'),
+  );
 
   expect(bsIO.seek(3), equals(1));
 
@@ -41,12 +43,18 @@ void doBytesIOTests(BytesIO bsIO) {
   expect(bsIO.toBytes(1), equals([2]));
   expect(bsIO.toBytes(2), equals([]));
 
-  expect(bsIO.bytesTo((bs, off, lng) => '${bs.sublist(off, off + lng)}'),
-      equals('[1, 2]'));
-  expect(bsIO.bytesTo((bs, off, lng) => '${bs.sublist(off, off + lng)}', 0, 1),
-      equals('[1]'));
-  expect(bsIO.bytesTo((bs, off, lng) => '${bs.sublist(off, off + lng)}', 1, 1),
-      equals('[2]'));
+  expect(
+    bsIO.bytesTo((bs, off, lng) => '${bs.sublist(off, off + lng)}'),
+    equals('[1, 2]'),
+  );
+  expect(
+    bsIO.bytesTo((bs, off, lng) => '${bs.sublist(off, off + lng)}', 0, 1),
+    equals('[1]'),
+  );
+  expect(
+    bsIO.bytesTo((bs, off, lng) => '${bs.sublist(off, off + lng)}', 1, 1),
+    equals('[2]'),
+  );
 
   expect(bsIO.indexOf(1), equals(0));
   expect(bsIO.indexOf(2), equals(1));
