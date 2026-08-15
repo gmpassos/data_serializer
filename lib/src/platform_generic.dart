@@ -236,9 +236,18 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
   int readInt64(Uint8List out, [int offset = 0, Endian endian = Endian.big]) =>
       getInt64(out.asByteData(), offset, endian);
 
+  /// The largest value this platform's shift operators handle exactly.
+  ///
+  /// An `int` is a JavaScript double here, and `<<` / `>>` are 32-bit
+  /// operations, so anything beyond this has to go through [BigInt].
+  static const int _maxShiftableInt = 0xFFFFFFFF;
+
   @override
   int shiftRightInt(int n, int shift) {
-    if (n >= 0) {
+    // `>>` truncates its operand to 32 bits before shifting, so it is only
+    // usable while the operand provably fits: `9007199254740991 >> 7` returned
+    // `33554431` rather than `70368744177663`.
+    if (n >= 0 && n <= _maxShiftableInt) {
       return n >> shift;
     }
 
@@ -250,7 +259,14 @@ class DataSerializerPlatformGeneric extends DataSerializerPlatform {
 
   @override
   int shiftLeftInt(int n, int shift) {
-    if (n >= 0) {
+    // The same 32-bit limit, but here it caps the *result*: `127 << 28`
+    // returned `4026531840` rather than `34091302912`, and any shift of 32 or
+    // more returned `0`. The guard admits exactly the cases whose result still
+    // fits in 32 bits.
+    if (n >= 0 &&
+        shift >= 0 &&
+        shift < 32 &&
+        n <= (_maxShiftableInt >> shift)) {
       return n << shift;
     }
 

@@ -1,3 +1,86 @@
+## 1.2.3
+
+Four correctness fixes. The first affects every platform; the other three are
+web-only (`dart2js`/`dartdevc`), where an `int` is a JavaScript double and the
+bitwise operators are 32-bit.
+
+- `DataSerializerPlatformGeneric` (web):
+  - **Fixed `shiftLeftInt` and `shiftRightInt` for non-negative operands.**
+    Both took a plain `<<` / `>>` fast path, which is a 32-bit operation here:
+    - `shiftLeftInt(127, 28)` returned `4026531840` instead of `34091302912`,
+      and **any shift of 32 or more returned `0`**.
+    - `shiftRightInt` truncated its operand before shifting, so
+      `shiftRightInt(9007199254740991, 7)` returned `33554431` instead of
+      `70368744177663`.
+    - Both now fall back to [BigInt] outside the range the 32-bit operators
+      handle exactly. Negative operands already did.
+  - This corrupted LEB128 encoding and decoding on the web for magnitudes past
+    2^28.
+
+- `Leb128` / `BytesBufferLeb128Extension` (web):
+  - **Fixed the value accumulator, which was truncating at 32 bits.** The
+    decoders folded each 7-bit group in with `|=`, and `|` is also a 32-bit
+    operation on the web, so any value past 2^32 lost its high bits. The groups
+    occupy disjoint bit ranges, so `+` is equivalent and stays exact.
+  - **Fixed signed decoding for magnitudes past ~2^49.** A LEB128 negative
+    sign-extends into every bit below its terminating byte, so the *unsigned*
+    form of a negative value is roughly `2^shift` — far larger than the value
+    itself, and past the range a JavaScript double represents exactly, even
+    when the value is comfortably inside it. The accumulator is now split at 49
+    bits and the halves recombined with [BigInt] only when the value reaches
+    that far. `DateTime.microsecondsSinceEpoch` sits in the affected range
+    (about 2^50.6), so a pre-1970 timestamp decoded to the wrong number on the
+    web while looking entirely ordinary.
+
+- `BytesBufferLeb128Extension`:
+  - **Fixed `readLeb128SignedInt`: it decoded almost every signed value
+    incorrectly, on every platform.**
+    - The sign of a LEB128 value lives in bit 6 of its *terminating* byte, but
+      `lastByte` was assigned *after* the `break`, so it only ever held the
+      previous continuation byte — or `0` for a single-byte value.
+    - Every negative value came back positive: `-1` read as `127`, `-2` as
+      `126`, `-64` as `64`.
+    - Multi-byte positives were affected in the other direction: `64` encodes as
+      `[0xC0, 0x00]`, and reading the sign from `0xC0` turned it into `-16320`;
+      `1000` became `-15384`.
+    - Values whose terminating and preceding bytes happened to agree on bit 6
+      decoded correctly by luck, which is why the existing `-1000000` test
+      passed throughout.
+    - The static `Leb128.decodeSigned` was never affected — it reads the sign
+      from the correct byte — so encoding was always right and only the
+      `BytesBuffer` read path was wrong.
+
+- Tests:
+  - Added regression tests for `readLeb128SignedInt`: single-byte negatives,
+    multi-byte positives, a wide range of magnitudes, interleaved signed and
+    unsigned reads in one buffer, and a cross-check pinning the buffer reader to
+    `Leb128.decodeSigned` so a fix on one side cannot be undone on the other.
+  - Added range tests for signed and unsigned reads from 2^28 up to 2^53-1, and
+    a case at microsecond-timestamp magnitudes, which is where the signed
+    accumulator went wrong on the web.
+  - Added direct tests for `shiftLeftInt` and `shiftRightInt` across and beyond
+    the 32-bit boundary, checked against `BigInt`, for positive and negative
+    operands.
+  - Ranges are built by multiplication rather than `1 << 40`, since a shift is a
+    32-bit operation on the web and such a literal is silently `0` there — a
+    test written that way does not check what it appears to.
+
+- CI:
+  - `.github/workflows/dart.yml`: the Chrome job now collects and uploads
+    coverage too. The two platforms run different implementations —
+    `platform_generic.dart` is the web one and is never loaded on the VM — so a
+    VM-only report left every web-only line permanently unmeasured, whatever
+    the tests actually did. That is precisely where three of the four bugs
+    above were hiding.
+  - Added `data_serializer_edge_cases_test.dart` covering paths the suite had
+    not reached: `BytesEmitter`'s rejection of data types it cannot represent,
+    `BytesBufferError.toString`, the `BytesIO` transfer defaults, the
+    `ByteDataExtension` length-range checks, `DataSerializerPlatform`'s 64-bit
+    reads, `BitsBuffer.isAtPadding`/`toString`, `Writable`'s default buffer
+    size, and `BytesFileIO`'s public constructor, transfer defaults and capacity
+    growth.
+  - Coverage: 98.1% → 99.6%.
+
 ## 1.2.2
 
 - CI:
