@@ -242,6 +242,183 @@ void main() {
       expect(bs.readLeb128String(), equals("Foooooooooooooooooooooooooooooo"));
     });
 
+    /// Reads back a value written with [BytesBuffer.writeLeb128SignedInt].
+    int roundTripSigned(int n) {
+      var bs = BytesBuffer()..writeLeb128SignedInt(n);
+      bs.seek(0);
+      return bs.readLeb128SignedInt();
+    }
+
+    test('readLeb128SignedInt sign-extends single-byte negatives', () {
+      // A single-byte value has no continuation byte at all, so the sign has to
+      // come from the terminating byte. Reading it from the *previous* byte
+      // left every one of these positive: `-2` came back as `126`.
+      for (var n in [-1, -2, -3, -32, -63, -64]) {
+        expect(roundTripSigned(n), equals(n), reason: 'signed $n');
+      }
+    });
+
+    test('readLeb128SignedInt does not sign-extend positives', () {
+      // The mirror failure: `64` encodes as `[0xC0, 0x00]`, and reading the
+      // sign from the first byte (`0xC0 & 0x40` set) turned it into `-16320`.
+      for (var n in [64, 65, 127, 128, 1000, 8192, 1 << 20]) {
+        expect(roundTripSigned(n), equals(n), reason: 'signed $n');
+      }
+    });
+
+    test('readLeb128SignedInt agrees with Leb128.decodeSigned', () {
+      // The static decoder was always correct; the buffer one is what drifted.
+      // Pinning them together is what keeps a fix on one side from being
+      // undone on the other.
+      for (var n = -100000; n <= 100000; n += 7) {
+        var bytes = Leb128.encodeSigned(n);
+        var viaBuffer = roundTripSigned(n);
+
+        expect(viaBuffer, equals(n), reason: 'signed $n');
+        expect(
+          viaBuffer,
+          equals(Leb128.decodeSigned(bytes)),
+          reason: 'buffer and static decoder disagree for $n',
+        );
+      }
+    });
+
+    test('readLeb128SignedInt over a wide range', () {
+      // Built by multiplication, not `1 << 40`: a shift is a 32-bit operation
+      // on the web, so the literal would silently be `0` there and the case
+      // would not test what it claims to.
+      const pow2_28 = 268435456;
+      const pow2_31 = 2147483648;
+      const pow2_35 = 34359738368;
+      const pow2_45 = 35184372088832;
+
+      for (var n in [
+        0,
+        1,
+        -1,
+        63,
+        -63,
+        64,
+        -64,
+        8191,
+        -8191,
+        8192,
+        -8192,
+        pow2_28,
+        -pow2_28,
+        pow2_31,
+        -pow2_31,
+        pow2_35,
+        -pow2_35,
+        pow2_45,
+        -pow2_45,
+        // The largest magnitude a JavaScript double represents exactly.
+        9007199254740991,
+        -9007199254740991,
+      ]) {
+        expect(roundTripSigned(n), equals(n), reason: 'signed $n');
+      }
+    });
+
+    test('readLeb128SignedInt at microsecond-timestamp magnitudes', () {
+      // Not a curiosity: a LEB128 negative sign-extends into every bit below
+      // its terminating byte, so the *unsigned* form of a negative is about
+      // `2^shift` — which left the exact range of a JavaScript double once the
+      // magnitude passed roughly 2^49. `DateTime.microsecondsSinceEpoch` sits
+      // right there, around 2^50.6, so a pre-1970 timestamp was corrupted on
+      // the web while looking perfectly ordinary.
+      const microsPerYear = 31557600000000;
+
+      for (var years = 1; years <= 55; years += 6) {
+        var micros = microsPerYear * years;
+
+        expect(roundTripSigned(micros), equals(micros));
+        expect(roundTripSigned(-micros), equals(-micros));
+      }
+
+      // The boundary itself, from just below the split to the exact-integer
+      // limit.
+      for (var n in [
+        562949953421311, // 2^49 - 1
+        562949953421312, // 2^49
+        1125899906842624, // 2^50
+        2251799813685248, // 2^51
+        4503599627370496, // 2^52
+        9007199254740991, // 2^53 - 1
+      ]) {
+        expect(roundTripSigned(n), equals(n), reason: 'signed $n');
+        expect(roundTripSigned(-n), equals(-n), reason: 'signed ${-n}');
+      }
+    });
+
+    test('readLeb128UnsignedInt over a wide range', () {
+      // The unsigned reader shares the same accumulator, which was where values
+      // past 2^32 were being truncated on the web.
+      const cases = [
+        0,
+        1,
+        127,
+        128,
+        16383,
+        16384,
+        268435456, // 2^28
+        4294967295, // 2^32 - 1
+        4294967296, // 2^32
+        35184372088832, // 2^45
+        9007199254740991, // 2^53 - 1
+      ];
+
+      for (var n in cases) {
+        var bs = BytesBuffer()..writeLeb128UnsignedInt(n);
+        bs.seek(0);
+        expect(bs.readLeb128UnsignedInt(), equals(n), reason: 'unsigned $n');
+
+        expect(
+          Leb128.decodeUnsigned(Leb128.encodeUnsigned(n)),
+          equals(n),
+          reason: 'static unsigned $n',
+        );
+      }
+    });
+
+    test('Leb128.decodeSigned over a wide range', () {
+      // The static pair is what the buffer readers are pinned to, so it is
+      // checked across the same range.
+      const pow2_35 = 34359738368;
+      const pow2_45 = 35184372088832;
+
+      for (var n in [
+        268435456,
+        -268435456,
+        pow2_35,
+        -pow2_35,
+        pow2_45,
+        -pow2_45,
+        9007199254740991,
+        -9007199254740991,
+      ]) {
+        expect(
+          Leb128.decodeSigned(Leb128.encodeSigned(n)),
+          equals(n),
+          reason: 'static signed $n',
+        );
+      }
+    });
+
+    test('signed and unsigned reads stay independent in one buffer', () {
+      var bs = BytesBuffer();
+      bs.writeLeb128SignedInt(-2);
+      bs.writeLeb128UnsignedInt(64);
+      bs.writeLeb128SignedInt(64);
+      bs.writeLeb128SignedInt(-1000);
+
+      bs.seek(0);
+      expect(bs.readLeb128SignedInt(), equals(-2));
+      expect(bs.readLeb128UnsignedInt(), equals(64));
+      expect(bs.readLeb128SignedInt(), equals(64));
+      expect(bs.readLeb128SignedInt(), equals(-1000));
+    });
+
     test('basic 3', () {
       var bs = BytesBuffer();
 
