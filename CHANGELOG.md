@@ -64,6 +64,14 @@ bitwise operators are 32-bit.
   - Ranges are built by multiplication rather than `1 << 40`, since a shift is a
     32-bit operation on the web and such a literal is silently `0` there — a
     test written that way does not check what it appears to.
+
+- CI:
+  - `.github/workflows/dart.yml`: the Chrome job now collects and uploads
+    coverage too. The two platforms run different implementations —
+    `platform_generic.dart` is the web one and is never loaded on the VM — so a
+    VM-only report left every web-only line permanently unmeasured, whatever
+    the tests actually did. That is precisely where three of the four bugs
+    above were hiding.
   - Added `data_serializer_edge_cases_test.dart` covering paths the suite had
     not reached: `BytesEmitter`'s rejection of data types it cannot represent,
     `BytesBufferError.toString`, the `BytesIO` transfer defaults, the
